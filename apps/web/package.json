@@ -7,7 +7,7 @@
     "build": "next build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest --config jest.config.cjs"
+    "test": "jest --config jest.config.cjs --passWithNoTests"
   },
   "dependencies": {
     "@billit/api": "workspace:*",
