@@ -6,3 +6,4 @@ pnpm-lock.yaml
 dist
 web-build
 .expo
+next-env.d.ts

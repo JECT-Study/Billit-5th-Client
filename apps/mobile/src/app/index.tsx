@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { apiBaseUrl } from '@/lib/api';
 
 export default function HomeScreen() {
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 justify-center gap-6 px-6">
