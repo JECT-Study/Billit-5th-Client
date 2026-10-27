@@ -1,7 +1,8 @@
 import type { ExpoConfig } from 'expo/config';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
-const easProjectId = process.env.EAS_PROJECT_ID ?? 'a8b2d0e5-bb17-43d9-b41e-d2fab0ef17b8';
+const easProjectId =
+  process.env.EAS_PROJECT_ID ?? 'a8b2d0e5-bb17-43d9-b41e-d2fab0ef17b8';
 
 const config: ExpoConfig = {
   name: 'Billit',
