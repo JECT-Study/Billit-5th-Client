@@ -1,19 +1,25 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const suit = localFont({
+  src: [
+    { path: '../../../packages/fonts/SUIT-Thin.otf', weight: '100' },
+    { path: '../../../packages/fonts/SUIT-ExtraLight.otf', weight: '200' },
+    { path: '../../../packages/fonts/SUIT-Light.otf', weight: '300' },
+    { path: '../../../packages/fonts/SUIT-Regular.otf', weight: '400' },
+    { path: '../../../packages/fonts/SUIT-Medium.otf', weight: '500' },
+    { path: '../../../packages/fonts/SUIT-SemiBold.otf', weight: '600' },
+    { path: '../../../packages/fonts/SUIT-Bold.otf', weight: '700' },
+    { path: '../../../packages/fonts/SUIT-ExtraBold.otf', weight: '800' },
+    { path: '../../../packages/fonts/SUIT-Heavy.otf', weight: '900' },
+  ],
+  variable: '--font-suit',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -23,8 +29,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="font-[family-name:var(--font-geist-sans)]">
+    <html lang="ko" className={suit.variable}>
+      <body className="font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

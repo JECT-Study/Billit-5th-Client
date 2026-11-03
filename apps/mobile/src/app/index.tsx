@@ -9,7 +9,7 @@ export default function HomeScreen() {
       <View className="flex-1 justify-center gap-6 px-6">
         <View className="gap-2">
           <Text className="text-brand text-3xl font-bold">Billit</Text>
-          <Text className="text-base text-neutral-700">API {apiBaseUrl}</Text>
+          <Text className="text-base text-neutral-700 font-medium">API {apiBaseUrl}</Text>
         </View>
       </View>
     </SafeAreaView>
