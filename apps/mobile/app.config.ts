@@ -16,6 +16,7 @@ const config: ExpoConfig = {
   ios: {
     icon: './assets/expo.icon',
     bundleIdentifier: 'com.jectstudy.billit',
+    appleTeamId: '47PCQDM827',
   },
   android: {
     package: 'com.jectstudy.billit',
