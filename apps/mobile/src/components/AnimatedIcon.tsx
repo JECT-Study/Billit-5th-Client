@@ -9,10 +9,10 @@ const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
 
 export function AnimatedSplashOverlay() {
-  const [animate, setAnimate] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!visible) return null;
+  if (!isVisible) return null;
 
   const splashKeyframe = new Keyframe({
     0: {
@@ -40,12 +40,12 @@ export function AnimatedSplashOverlay() {
     />
   );
 
-  return animate ? (
+  return isAnimating ? (
     <Animated.View
       entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
         'worklet';
         if (finished) {
-          scheduleOnRN(setVisible, false);
+          scheduleOnRN(setIsVisible, false);
         }
       })}
       style={styles.splashOverlay}
@@ -56,7 +56,7 @@ export function AnimatedSplashOverlay() {
     <View
       onLayout={() => {
         SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
+          setIsAnimating(true);
         });
       }}
       style={styles.splashOverlay}

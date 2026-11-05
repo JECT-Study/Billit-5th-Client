@@ -1,6 +1,6 @@
 import { createApiClient } from '@billit/api';
 
-import { webTokenStorage } from './token-storage';
+import { webTokenStorage } from './tokenStorage';
 
 export const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';

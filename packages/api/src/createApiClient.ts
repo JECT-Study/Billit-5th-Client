@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 
-import type { TokenStorage } from './token-storage';
+import type { TokenStorage } from './tokenStorage';
 
 export function createApiClient(options: {
   baseURL: string;
