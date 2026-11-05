@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import type { NextConfig } from 'next';
 
+const apiProxyTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080';
+
 const nextConfig = {
   // 컨테이너 배포용
   output: 'standalone',
@@ -12,6 +14,12 @@ const nextConfig = {
   },
   transpilePackages: ['@billit/api', '@billit/store', '@billit/validators'],
   agentRules: false,
+  async rewrites() {
+    if (process.env.NODE_ENV !== 'development') return [];
+    return [
+      { source: '/api/:path*', destination: `${apiProxyTarget}/api/:path*` },
+    ];
+  },
 } as NextConfig;
 
 export default nextConfig;
