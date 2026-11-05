@@ -1,6 +1,6 @@
 import { createApiClient } from '@billit/api';
 
-import { mobileTokenStorage } from './token-storage';
+import { mobileTokenStorage } from './tokenStorage';
 
 export const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';

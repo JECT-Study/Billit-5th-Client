@@ -3,13 +3,13 @@ import { SymbolView } from 'expo-symbols';
 import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
+import { ExternalLink } from '@/components/ExternalLink';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Collapsible } from '@/components/ui/Collapsible';
+import { WebBadge } from '@/components/WebBadge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -130,7 +130,7 @@ export default function TabTwoScreen() {
             <ThemedText type="small">
               This template includes an example of an animated component. The{' '}
               <ThemedText type="code">
-                src/components/ui/collapsible.tsx
+                src/components/ui/Collapsible.tsx
               </ThemedText>{' '}
               component uses the powerful{' '}
               <ThemedText type="code">react-native-reanimated</ThemedText>{' '}

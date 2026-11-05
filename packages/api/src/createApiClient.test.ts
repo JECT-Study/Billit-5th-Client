@@ -1,6 +1,6 @@
 import type { InternalAxiosRequestConfig } from 'axios';
 
-import { createApiClient } from './create-api-client';
+import { createApiClient } from './createApiClient';
 
 describe('createApiClient', () => {
   it('adds a bearer token from storage', async () => {
