@@ -1,7 +1,7 @@
 // FE 네이밍 컨벤션 (ESLint로 검사 가능한 부분만)
 import checkFile from 'eslint-plugin-check-file';
 
-const LEVEL = 'warn';
+const LEVEL = 'error';
 
 const TS_FILES = ['**/*.{ts,tsx}'];
 const IGNORES = ['**/*.d.ts', '**/*.config.{ts,mts}'];
