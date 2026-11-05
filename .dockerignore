@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/.turbo
+**/out
+**/.expo
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+.git
+.github
+.vscode
+apps/mobile
+Dockerfile
