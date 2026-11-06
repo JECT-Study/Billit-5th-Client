@@ -26,9 +26,9 @@ const suitFonts = {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [fontsLoaded, fontError] = useFonts(suitFonts);
+  const [isFontsLoaded, fontError] = useFonts(suitFonts);
 
-  if (!fontsLoaded && !fontError) {
+  if (!isFontsLoaded && !fontError) {
     return null;
   }
 
