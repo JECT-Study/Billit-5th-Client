@@ -1,0 +1,72 @@
+# 웹(apps/web) 컨테이너 배포. 빌드, 배포는 Billit-5th-Infra 공통 워크플로를 호출함
+#  - develop push: 검사 → ARM64 이미지 빌드(GHCR ject-fe) → 개발 서버 자동 배포 → 커밋에 ject/dev-verified 기록
+#  - 운영: workflow_dispatch로 개발에서 검증된 digest와 그 커밋을 넣어 수동 배포. 롤백은 action=rollback
+#  - 자동 배포는 저장소 변수 CD_ENABLED가 true일 때만 동작함(Environments, 비밀값 등록 전에는 건너뜀)
+# 공통 워크플로를 고치면 아래 참조 SHA도 함께 올림
+name: cd
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+      - '.nvmrc'
+      - '.dockerignore'
+      - '.github/workflows/cd.yml'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [prod, dev], default: prod }
+      action: { type: choice, options: [deploy, rollback], default: deploy }
+      image:
+        type: string
+        required: false
+        description: 'deploy: ghcr.io/ject-study/ject-fe@sha256:...'
+      commit:
+        type: string
+        required: false
+        description: 'prod deploy: 이미지를 만든 커밋 SHA(40자)'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event_name == 'push' && vars.CD_ENABLED == 'true'
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: check
+    permissions: { contents: read, packages: write }
+    uses: JECT-Study/Billit-5th-Infra/.github/workflows/build-arm64.yml@2c4523f36c3f2c0c223b7a3e1af9aa2421607abe
+    with:
+      dockerfile: apps/web/Dockerfile
+      image_name: ject-fe
+
+  deploy-dev:
+    needs: build
+    permissions: { contents: read, packages: read, statuses: write }
+    uses: JECT-Study/Billit-5th-Infra/.github/workflows/deploy-via-bastion.yml@2c4523f36c3f2c0c223b7a3e1af9aa2421607abe
+    with:
+      environment: dev
+      service: fe
+      image: ${{ needs.build.outputs.image }}
+      commit: ${{ github.sha }}
+    secrets: inherit
+
+  deploy-manual:
+    if: github.event_name == 'workflow_dispatch'
+    permissions: { contents: read, packages: read, statuses: write }
+    uses: JECT-Study/Billit-5th-Infra/.github/workflows/deploy-via-bastion.yml@2c4523f36c3f2c0c223b7a3e1af9aa2421607abe
+    with:
+      environment: ${{ inputs.environment }}
+      service: fe
+      action: ${{ inputs.action }}
+      image: ${{ inputs.image }}
+      commit: ${{ inputs.commit }}
+    secrets: inherit

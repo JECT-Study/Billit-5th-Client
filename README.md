@@ -35,21 +35,30 @@ pnpm dev:mobile:web   # http://localhost:5173
 
 ## 웹 배포
 
-`pnpm --filter @billit/web build`는 `apps/web/out`에 정적 파일을 만듭니다. nginx의 루트를 이 폴더로 두면 됩니다. 주소 끝의 슬래시를 유지하므로 `try_files $uri $uri/ $uri/index.html`로 라우트를 찾습니다.
+웹은 Next.js `standalone` 빌드를 컨테이너로 만들어 OCI 서버에 배포합니다. 빌드·배포는 [Billit-5th-Infra](https://github.com/JECT-Study/Billit-5th-Infra) 공통 워크플로를 `.github/workflows/cd.yml`에서 호출합니다.
 
-`NEXT_PUBLIC_API_URL`은 빌드 시점에 번들에 들어갑니다. 운영 API 주소로 배포하려면 빌드 전에 그 값을 넣습니다.
+- `develop` push(웹·공유 패키지 변경 시): 검사 → ARM64 이미지 빌드(`ghcr.io/ject-study/ject-fe`) → 개발 서버 자동 배포
+- 운영: Actions의 `cd` 워크플로를 수동 실행하고, 개발에서 검증된 이미지 digest와 커밋 SHA를 넣습니다. 롤백은 `action=rollback`
+- 자동 배포는 저장소 변수 `CD_ENABLED=true`일 때만 동작합니다.
+
+로컬에서 이미지를 확인하려면 저장소 루트에서 실행합니다.
+
+```bash
+docker build -f apps/web/Dockerfile -t billit-web .
+docker run --rm -p 3000:3000 --memory 384m billit-web
+curl http://localhost:3000/healthz   # ok
+```
+
+서버에서는 Nginx가 `/api/`를 백엔드로, 나머지를 웹 컨테이너(3000)로 보냅니다. 웹과 API가 같은 출처라 API 주소를 빌드에 넣지 않습니다.
 
 ## 환경 변수
 
 예시는 각 앱의 `.env.example`에 있습니다.
 
-- 웹: `apps/web/.env`의 `NEXT_PUBLIC_API_URL`
+- 웹: API는 같은 출처의 `/api/v1/...`로 호출합니다. 로컬 개발 서버는 `/api` 요청을 `API_PROXY_TARGET`(기본 `http://localhost:8080`)으로 넘깁니다.
 - 앱: `apps/mobile/.env`의 `EXPO_PUBLIC_API_URL`
 
-로컬 백엔드는 아래의 CORS를 허용합니다.
-
-- `http://localhost:3000`
-- `http://localhost:5173`
+웹은 프록시를 쓰므로 CORS가 필요 없습니다. Expo 웹 프리뷰(`http://localhost:5173`)만 로컬 백엔드의 CORS 허용이 필요합니다.
 
 인증 토큰은 `Authorization: Bearer` 헤더로 보냅니다. 웹은 `localStorage`, 앱은 `expo-secure-store`, Expo 웹 프리뷰는 `localStorage`를 사용합니다.
 
