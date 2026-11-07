@@ -65,10 +65,10 @@ const config: ExpoConfig = {
   },
   ...(easProjectId
     ? {
-      updates: {
-        url: `https://u.expo.dev/${easProjectId}`,
-      },
-    }
+        updates: {
+          url: `https://u.expo.dev/${easProjectId}`,
+        },
+      }
     : {}),
 };
 
