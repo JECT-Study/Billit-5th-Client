@@ -53,6 +53,11 @@ const config: ExpoConfig = {
   },
   extra: {
     apiUrl,
+    // src/app이 남아 있으면 Expo Router가 app/을 무시하므로 고정
+    // src/app 삭제 후 없애도 됨
+    router: {
+      root: 'app',
+    },
     ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
   },
   runtimeVersion: {
@@ -60,10 +65,10 @@ const config: ExpoConfig = {
   },
   ...(easProjectId
     ? {
-        updates: {
-          url: `https://u.expo.dev/${easProjectId}`,
-        },
-      }
+      updates: {
+        url: `https://u.expo.dev/${easProjectId}`,
+      },
+    }
     : {}),
 };
 
