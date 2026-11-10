@@ -8,7 +8,7 @@ Billit 프론트엔드 모노레포입니다. 웹은 Next.js, 앱은 Expo입니�
 - 웹: Next.js 16, 개발 서버 `http://localhost:3000`
 - 앱: Expo SDK 57, Expo Router, EAS. 웹 프리뷰 `http://localhost:5173`
 - 공유: Axios, TanStack Query, Zustand, zod, react-hook-form
-- 스타일: NativeWind 4 (앱), Tailwind CSS 3 (웹). 색 토큰은 `packages/config`에서 공유합니다.
+- 스타일: NativeWind 4 (앱), Tailwind CSS 3 (웹)
 - React `19.2.3`으로 고정합니다. Expo SDK 57과 NativeWind 4.2.7이 이 버전을 기준으로 하고, Next.js도 같은 사본을 씁니다.
 
 Expo SDK 58은 NativeWind 안정 버전이 아직 지원하지 않아 SDK 57을 사용합니다.

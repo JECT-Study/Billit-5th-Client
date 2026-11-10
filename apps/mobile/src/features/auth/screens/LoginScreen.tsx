@@ -2,38 +2,27 @@ import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import {
-  APPLE_BUTTON_COLOR,
-  BORDER_SUBTLE_COLOR,
-  GRAY_008,
-  KAKAO_BUTTON_COLOR,
-  SCREEN_BACKGROUND_COLOR,
-} from '@/shared/ui/colors';
-
 const SOCIAL_LOGIN_OPTIONS = [
   {
     id: 'google',
     label: '구글로 계속하기',
     mark: 'G',
-    backgroundColor: SCREEN_BACKGROUND_COLOR,
-    textColor: GRAY_008,
-    borderColor: BORDER_SUBTLE_COLOR,
+    buttonClassName: 'border-line bg-canvas',
+    textClassName: 'text-gray-008',
   },
   {
     id: 'apple',
     label: '애플로 계속하기',
     mark: '',
-    backgroundColor: APPLE_BUTTON_COLOR,
-    textColor: SCREEN_BACKGROUND_COLOR,
-    borderColor: APPLE_BUTTON_COLOR,
+    buttonClassName: 'border-apple bg-apple',
+    textClassName: 'text-canvas',
   },
   {
     id: 'kakao',
     label: '카카오로 계속하기',
     mark: 'TALK',
-    backgroundColor: KAKAO_BUTTON_COLOR,
-    textColor: GRAY_008,
-    borderColor: KAKAO_BUTTON_COLOR,
+    buttonClassName: 'border-kakao bg-kakao',
+    textClassName: 'text-gray-008',
   },
 ] as const;
 
@@ -43,24 +32,23 @@ export function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: SCREEN_BACKGROUND_COLOR }}>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <SafeAreaView className="bg-canvas flex-1">
+      <View className="flex-1 items-center justify-center">
         <Text
           accessibilityRole="header"
-          style={{ color: GRAY_008, fontSize: 36, fontWeight: '700' }}
+          className="text-gray-008 text-4xl font-bold"
         >
           Billit
         </Text>
       </View>
-      <View style={{ gap: 12, paddingHorizontal: 24, paddingBottom: 32 }}>
+      <View className="gap-3 px-6 pb-8">
         {SOCIAL_LOGIN_OPTIONS.map((option) => (
           <SocialLoginButton
             key={option.id}
             label={option.label}
             mark={option.mark}
-            backgroundColor={option.backgroundColor}
-            textColor={option.textColor}
-            borderColor={option.borderColor}
+            buttonClassName={option.buttonClassName}
+            textClassName={option.textClassName}
             onPress={handlePressSocialLogin}
           />
         ))}
@@ -72,18 +60,16 @@ export function LoginScreen() {
 type SocialLoginButtonProps = {
   label: string;
   mark: string;
-  backgroundColor: string;
-  textColor: string;
-  borderColor: string;
+  buttonClassName: string;
+  textClassName: string;
   onPress: () => void;
 };
 
 function SocialLoginButton({
   label,
   mark,
-  backgroundColor,
-  textColor,
-  borderColor,
+  buttonClassName,
+  textClassName,
   onPress,
 }: SocialLoginButtonProps) {
   function handlePress() {
@@ -97,30 +83,14 @@ function SocialLoginButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      style={{
-        height: 52,
-        borderRadius: 12,
-        backgroundColor,
-        borderColor,
-        borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      className={`h-14 items-center justify-center rounded-xl border ${buttonClassName}`}
     >
       {hasMark ? (
-        <Text
-          style={{
-            position: 'absolute',
-            left: 20,
-            color: textColor,
-            fontSize: 12,
-            fontWeight: '700',
-          }}
-        >
+        <Text className={`absolute left-5 text-xs font-bold ${textClassName}`}>
           {mark}
         </Text>
       ) : null}
-      <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>
+      <Text className={`text-base font-semibold ${textClassName}`}>
         {label}
       </Text>
     </Pressable>

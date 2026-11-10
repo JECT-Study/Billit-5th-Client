@@ -1,7 +1,5 @@
 import { Pressable, Text } from 'react-native';
 
-import { PRIMARY_BUTTON_COLOR, SCREEN_BACKGROUND_COLOR } from './colors';
-
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
@@ -17,23 +15,9 @@ export function PrimaryButton({ label, onPress }: PrimaryButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      style={{
-        height: 52,
-        borderRadius: 12,
-        backgroundColor: PRIMARY_BUTTON_COLOR,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      className="bg-primary h-14 items-center justify-center rounded-xl"
     >
-      <Text
-        style={{
-          color: SCREEN_BACKGROUND_COLOR,
-          fontSize: 16,
-          fontWeight: '600',
-        }}
-      >
-        {label}
-      </Text>
+      <Text className="text-canvas text-base font-semibold">{label}</Text>
     </Pressable>
   );
 }

@@ -1,7 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
 
-import { GRAY_008 } from './colors';
-
 type NavigationHeaderProps = {
   title: string;
   onPressBack: () => void;
@@ -16,40 +14,23 @@ export function NavigationHeader({
   }
 
   return (
-    <View
-      style={{
-        height: 48,
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}
-    >
+    <View className="h-12 flex-row items-center">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="뒤로 가기"
         onPress={handlePressBack}
-        style={{
-          width: 48,
-          height: 48,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        className="h-12 w-12 items-center justify-center"
       >
-        <Text style={{ color: GRAY_008, fontSize: 28, lineHeight: 32 }}>‹</Text>
+        <Text className="text-gray-008 text-3xl font-normal leading-8">‹</Text>
       </Pressable>
       <Text
         accessibilityRole="header"
         numberOfLines={1}
-        style={{
-          flex: 1,
-          color: GRAY_008,
-          fontSize: 16,
-          fontWeight: '600',
-          textAlign: 'center',
-        }}
+        className="text-gray-008 flex-1 text-center text-xl font-semibold"
       >
         {title}
       </Text>
-      <View style={{ width: 48 }} />
+      <View className="w-12" />
     </View>
   );
 }

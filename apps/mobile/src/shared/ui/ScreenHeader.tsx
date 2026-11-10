@@ -1,28 +1,15 @@
 import { Text, View } from 'react-native';
 
-import { GRAY_008 } from './colors';
-
 type ScreenHeaderProps = {
   title: string;
 };
 
 export function ScreenHeader({ title }: ScreenHeaderProps) {
   return (
-    <View
-      style={{
-        height: 48,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <View className="h-12 items-center justify-center">
       <Text
         accessibilityRole="header"
-        style={{
-          color: GRAY_008,
-          fontSize: 16,
-          fontWeight: '600',
-          textAlign: 'center',
-        }}
+        className="text-gray-008 text-center text-xl font-semibold"
       >
         {title}
       </Text>
