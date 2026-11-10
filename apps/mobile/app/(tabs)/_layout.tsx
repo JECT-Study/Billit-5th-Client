@@ -15,10 +15,13 @@ export const unstable_settings = {
 export default function TabLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
-      <Tabs.Screen name="trips" options={{ title: '여행방' }} />
-      <Tabs.Screen name="fx/index" options={{ title: '환율 관리' }} />
-      <Tabs.Screen name="my/index" options={{ title: '마이' }} />
-      <Tabs.Screen name="settings/index" options={{ title: '설정' }} />
+      <Tabs.Screen name="trips" options={{ title: '여행 관리' }} />
+      <Tabs.Screen name="quick-entry" options={{ title: '빠른 입력' }} />
+      <Tabs.Screen name="settlements" options={{ title: '정산 내역' }} />
+      <Tabs.Screen
+        name="my"
+        options={{ title: '마이', popToTopOnBlur: true }}
+      />
     </Tabs>
   );
 }

@@ -1,9 +1,0 @@
-export const GRAY_008 = '#292C2D';
-export const GRAY_004 = '#B9BBC0';
-export const TEXT_SECONDARY = '#616366';
-export const PRIMARY_BUTTON_COLOR = '#669EC3';
-export const KAKAO_BUTTON_COLOR = '#FCE757';
-export const APPLE_BUTTON_COLOR = '#181818';
-export const SCREEN_BACKGROUND_COLOR = '#FFFFFF';
-export const SURFACE_MUTED_COLOR = '#E8F4FB';
-export const BORDER_SUBTLE_COLOR = '#E6E8EB';

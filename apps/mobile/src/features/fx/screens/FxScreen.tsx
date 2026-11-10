@@ -1,15 +1,16 @@
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SCREEN_BACKGROUND_COLOR } from '@/shared/ui/colors';
-import { ScreenHeader } from '@/shared/ui/ScreenHeader';
+import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 
 export function FxScreen() {
+  function handlePressBack() {
+    router.back();
+  }
+
   return (
-    <SafeAreaView
-      edges={['top', 'left', 'right']}
-      style={{ flex: 1, backgroundColor: SCREEN_BACKGROUND_COLOR }}
-    >
-      <ScreenHeader title="환율 관리" />
+    <SafeAreaView edges={['top', 'left', 'right']} className="bg-canvas flex-1">
+      <NavigationHeader title="환율 관리" onPressBack={handlePressBack} />
     </SafeAreaView>
   );
 }

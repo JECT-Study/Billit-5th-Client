@@ -1,5 +1,5 @@
-import { MyScreen } from '@/features/my';
+import { SettingsScreen } from '@/features/settings';
 
 export default function MyRoute() {
-  return <MyScreen />;
+  return <SettingsScreen />;
 }
