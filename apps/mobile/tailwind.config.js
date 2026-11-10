@@ -22,6 +22,19 @@ module.exports = {
       fontFamily: {
         sans: ['SUIT-Regular'],
       },
+      colors: {
+        gray: {
+          '004': '#B9BBC0',
+          '008': '#292C2D',
+        },
+        secondary: '#616366',
+        primary: '#669EC3',
+        kakao: '#FCE757',
+        apple: '#181818',
+        canvas: '#FFFFFF',
+        surface: '#E8F4FB',
+        line: '#E6E8EB',
+      },
     },
   },
   corePlugins: {
