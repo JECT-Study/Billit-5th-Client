@@ -15,11 +15,12 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   ios: {
     icon: './assets/expo.icon',
-    bundleIdentifier: 'com.jectstudy.billit',
+    bundleIdentifier: 'app.billit.mobile',
     appleTeamId: '47PCQDM827',
+    usesAppleSignIn: true,
   },
   android: {
-    package: 'com.jectstudy.billit',
+    package: 'app.billit.mobile',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',
@@ -36,6 +37,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    'expo-apple-authentication',
     'expo-secure-store',
     ['expo-build-properties', { ios: { enableSceneSupport: true } }],
     [
