@@ -85,7 +85,17 @@ const config: ExpoConfig = {
         ios: { handleKakaoOpenUrl: true },
       },
     ],
-    ['expo-build-properties', { ios: { enableSceneSupport: true } }],
+    [
+      'expo-build-properties',
+      {
+        ios: { enableSceneSupport: true },
+        android: {
+          extraMavenRepos: [
+            'https://devrepo.kakao.com/nexus/content/groups/public/',
+          ],
+        },
+      },
+    ],
     [
       'expo-splash-screen',
       {
