@@ -1,26 +1,32 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import MyTabIcon from '@/assets/images/tabIcons/my.svg';
+import QuickEntryTabIcon from '@/assets/images/tabIcons/quick-entry.svg';
+import SettlementsTabIcon from '@/assets/images/tabIcons/settlements.svg';
+import TripsTabIcon from '@/assets/images/tabIcons/trips.svg';
+import { Text } from '@/shared/ui/Text';
+import { COLORS } from '@/theme/theme.generated';
 
 const DISABLED_TAB_ROUTES = ['quick-entry'] as const;
 
 const TAB_ITEMS = {
   trips: {
     label: '여행 관리',
-    icon: require('@/assets/images/tabIcons/trips.svg'),
+    Icon: TripsTabIcon,
   },
   'quick-entry': {
     label: '빠른 입력',
-    icon: require('@/assets/images/tabIcons/quick-entry.svg'),
+    Icon: QuickEntryTabIcon,
   },
   settlements: {
     label: '정산 내역',
-    icon: require('@/assets/images/tabIcons/settlements.svg'),
+    Icon: SettlementsTabIcon,
   },
   my: {
     label: '마이',
-    icon: require('@/assets/images/tabIcons/my.svg'),
+    Icon: MyTabIcon,
   },
 } as const;
 
@@ -40,7 +46,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       accessibilityRole="tablist"
-      className="bg-canvas w-full flex-row items-center pt-2"
+      className="bg-surface-default w-full flex-row items-center pt-8"
       style={{ paddingBottom: Math.max(safeAreaInsets.bottom, 20) }}
     >
       {state.routes.map((route, index) => {
@@ -51,6 +57,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         const isDisabled = isDisabledTabRoute(route.name);
         const isSelected = !isDisabled && state.index === index;
         const tabItem = TAB_ITEMS[route.name];
+        const TabIcon = tabItem.Icon;
 
         function handlePressTab() {
           if (isDisabled) {
@@ -79,20 +86,20 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             }
             accessibilityLabel={tabItem.label}
             onPress={handlePressTab}
-            className="min-w-0 flex-1 items-center justify-center gap-2.5 p-2"
+            className="min-w-0 flex-1 items-center justify-center gap-10 p-8"
           >
-            <Image
-              source={tabItem.icon}
-              className={`h-6 w-6 ${
-                isSelected ? 'text-gray-008' : 'text-gray-004'
-              }`}
-              contentFit="contain"
+            <TabIcon
+              width={24}
+              height={24}
+              color={
+                isSelected ? COLORS['icon-default'] : COLORS['icon-inactive']
+              }
               accessible={false}
             />
             <Text
               numberOfLines={1}
-              className={`text-center text-sm font-semibold tracking-[0.203px] ${
-                isSelected ? 'text-gray-008' : 'text-gray-004'
+              className={`text-label-1 text-center font-semibold ${
+                isSelected ? 'text-primary' : 'text-placeholder'
               }`}
             >
               {tabItem.label}
