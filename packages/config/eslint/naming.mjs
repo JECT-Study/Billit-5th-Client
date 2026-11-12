@@ -147,8 +147,11 @@ export const namingReact = [
   },
 ];
 
-// 라우트 화면 컴포넌트(default export)는 ...Screen
+// 화면 컴포넌트는 ...Screen. 라우트 파일은 ...Route 라서 features/screens 에 적용한다.
 // no-restricted-syntax는 덮어쓰기라 zod 규칙도 같이 넣는다.
+const screenComponentMessage =
+  '화면 컴포넌트는 ...Screen 으로 끝나야 합니다. (예: HomeScreen)';
+
 export const namingScreen = (files) => [
   {
     files,
@@ -160,13 +163,21 @@ export const namingScreen = (files) => [
         {
           selector:
             'ExportDefaultDeclaration > FunctionDeclaration[id.name!=/Screen$/]',
-          message:
-            '화면 컴포넌트는 ...Screen 으로 끝나야 합니다. (예: HomeScreen)',
+          message: screenComponentMessage,
         },
         {
           selector: 'ExportDefaultDeclaration > Identifier[name!=/Screen$/]',
-          message:
-            '화면 컴포넌트는 ...Screen 으로 끝나야 합니다. (예: HomeScreen)',
+          message: screenComponentMessage,
+        },
+        {
+          selector:
+            'ExportNamedDeclaration > FunctionDeclaration[id.name!=/Screen$/]',
+          message: screenComponentMessage,
+        },
+        {
+          selector:
+            'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name!=/Screen$/][init.type=/^(ArrowFunctionExpression|FunctionExpression)$/]',
+          message: screenComponentMessage,
         },
       ],
     },
