@@ -162,3 +162,6 @@ expo-env.d.ts
 .metro-health-check*
 google-services.json
 GoogleService-Info.plist
+
+# macOS
+.DS_Store
