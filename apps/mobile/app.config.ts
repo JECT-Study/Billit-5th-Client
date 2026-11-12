@@ -1,8 +1,42 @@
 import type { ExpoConfig } from 'expo/config';
 
+type AppEnv = 'development' | 'production';
+
+const appEnv: AppEnv =
+  process.env.APP_ENV === 'production' ? 'production' : 'development';
+
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 const easProjectId =
   process.env.EAS_PROJECT_ID ?? 'a8b2d0e5-bb17-43d9-b41e-d2fab0ef17b8';
+
+// 소셜 로그인 공개 식별자
+const googleClientIds: Record<
+  AppEnv,
+  { webClientId: string; iosClientId: string }
+> = {
+  development: {
+    webClientId:
+      '340075255253-4krej20mcmgkfqubc1urgeiavbnidchd.apps.googleusercontent.com',
+    iosClientId:
+      '340075255253-1pl65qu5brsind4l55r6fq21ol465aso.apps.googleusercontent.com',
+  },
+  production: {
+    webClientId:
+      '57223671245-pbjmh9rbfgft56fat2e9e9c2joqaeoum.apps.googleusercontent.com',
+    iosClientId:
+      '57223671245-5dsesnakhjhm2qcfl9d7f184odtod4m8.apps.googleusercontent.com',
+  },
+};
+const kakaoNativeAppKey = 'd0e43e75e5cbbc817e4603bcdb10d7a5';
+
+const { webClientId: googleWebClientId, iosClientId: googleIosClientId } =
+  googleClientIds[appEnv];
+
+// iOS client ID를 뒤집은 값이 Google Sign-In URL scheme
+const googleIosUrlScheme = `com.googleusercontent.apps.${googleIosClientId.replace(
+  '.apps.googleusercontent.com',
+  '',
+)}`;
 
 const config: ExpoConfig = {
   name: 'Billit',
@@ -39,7 +73,29 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-apple-authentication',
     'expo-secure-store',
-    ['expo-build-properties', { ios: { enableSceneSupport: true } }],
+    [
+      '@react-native-google-signin/google-signin',
+      { iosUrlScheme: googleIosUrlScheme },
+    ],
+    [
+      '@react-native-kakao/core',
+      {
+        nativeAppKey: kakaoNativeAppKey,
+        android: { authCodeHandlerActivity: true },
+        ios: { handleKakaoOpenUrl: true },
+      },
+    ],
+    [
+      'expo-build-properties',
+      {
+        ios: { enableSceneSupport: true },
+        android: {
+          extraMavenRepos: [
+            'https://devrepo.kakao.com/nexus/content/groups/public/',
+          ],
+        },
+      },
+    ],
     [
       'expo-splash-screen',
       {
@@ -55,6 +111,10 @@ const config: ExpoConfig = {
   },
   extra: {
     apiUrl,
+    appEnv,
+    googleWebClientId,
+    googleIosClientId,
+    kakaoNativeAppKey,
     ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
   },
   runtimeVersion: {
