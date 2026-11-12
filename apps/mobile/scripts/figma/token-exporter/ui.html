@@ -1,0 +1,173 @@
+<style>
+  body {
+    margin: 0;
+    padding: 16px;
+    font:
+      12px/1.5 Inter,
+      system-ui,
+      sans-serif;
+    color: var(--figma-color-text);
+    background: var(--figma-color-bg);
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+  }
+  .muted {
+    color: var(--figma-color-text-secondary);
+  }
+  ul {
+    margin: 4px 0 12px;
+    padding-left: 18px;
+  }
+  .warn {
+    color: var(--figma-color-text-warning);
+  }
+  .error {
+    color: var(--figma-color-text-danger);
+    white-space: pre-wrap;
+  }
+  details {
+    margin: 0 0 12px;
+  }
+  summary {
+    cursor: pointer;
+  }
+  details ul {
+    max-height: 140px;
+    overflow: auto;
+  }
+  textarea {
+    width: 100%;
+    height: 220px;
+    box-sizing: border-box;
+    font:
+      11px/1.4 ui-monospace,
+      monospace;
+    color: inherit;
+    background: var(--figma-color-bg-secondary);
+    border: 1px solid var(--figma-color-border);
+    border-radius: 6px;
+    padding: 8px;
+    resize: none;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  button {
+    flex: 1;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--figma-color-border);
+    background: var(--figma-color-bg);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  button.primary {
+    background: var(--figma-color-bg-brand);
+    color: var(--figma-color-text-onbrand);
+    border: none;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+</style>
+
+<h1>Billit Token Exporter</h1>
+<div id="status" class="muted">토큰을 읽는 중…</div>
+<div id="summary"></div>
+<div id="unused"></div>
+<textarea id="output" readonly placeholder="tokens.json"></textarea>
+<div class="actions">
+  <button id="copy" disabled>복사</button>
+  <button id="download" class="primary" disabled>tokens.json 다운로드</button>
+  <button id="close">닫기</button>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const send = (msg) => parent.postMessage({ pluginMessage: msg }, '*');
+  const escape = (s) =>
+    String(s).replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    );
+
+  onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    if (msg.type === 'error') {
+      $('status').className = 'error';
+      $('status').textContent = `내보내기 실패\n${msg.message}`;
+      return;
+    }
+
+    const { summary, warnings, json, unused } = msg;
+    $('unused').innerHTML = renderUnused(unused);
+    $('status').className = 'muted';
+    $('status').textContent =
+      `${summary.file} (${summary.fileKey || 'fileKey 없음'})`;
+    $('summary').innerHTML = `
+      <ul>
+        ${Object.entries(summary.counts)
+          .map(([name, n]) => `<li>${escape(name)}: 변수 ${n}개</li>`)
+          .join('')}
+        <li>텍스트 스타일 ${summary.textStyles}개, 이펙트 스타일 ${summary.effectStyles}개</li>
+      </ul>
+      ${warnings.length ? `<ul class="warn">${warnings.map((w) => `<li>${escape(w)}</li>`).join('')}</ul>` : ''}`;
+    $('output').value = json;
+    $('copy').disabled = false;
+    $('download').disabled = false;
+  };
+
+  // comp 섹션에서 쓰지 않는 토큰 (내보내기에는 포함됨, 확인용)
+  function renderUnused(u) {
+    if (!u) return '';
+    if (u.error) return `<p class="warn">${escape(u.error)}</p>`;
+    const groups = [
+      ...Object.entries(u.variables).map(([name, list]) => [name, list]),
+      ['텍스트 스타일', u.textStyles],
+      ['이펙트 스타일', u.effectStyles],
+    ].filter(([, list]) => list.length);
+    const total = groups.reduce((n, [, list]) => n + list.length, 0);
+    if (!total)
+      return `<p class="muted">✅ 내보낸 토큰은 모두 ${escape(u.scope)} 섹션에서 쓰이고 있습니다.</p>`;
+    return `
+      <details>
+        <summary class="warn">⚠️ ${escape(u.scope)} 섹션에서 쓰지 않는 토큰 ${total}개 (내보내기에는 포함됨)</summary>
+        <p class="muted">화면에서만 쓰거나 앞으로 쓸 토큰이면 그대로 두세요. 테스트용·중복 토큰이면 Figma에서 정리하세요.</p>
+        ${groups.map(([name, list]) => `<div>${escape(name)} (${list.length})</div><ul>${list.map((n) => `<li>${escape(n)}</li>`).join('')}</ul>`).join('')}
+      </details>`;
+  }
+
+  $('copy').onclick = () => {
+    $('output').select();
+    document.execCommand('copy');
+    send({ type: 'notify', text: 'tokens.json 내용을 복사했습니다.' });
+  };
+
+  $('download').onclick = () => {
+    const url = URL.createObjectURL(
+      new Blob([$('output').value], { type: 'application/json' }),
+    );
+    const a = Object.assign(document.createElement('a'), {
+      href: url,
+      download: 'tokens.json',
+    });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    send({
+      type: 'notify',
+      text: 'tokens.json을 저장했습니다. apps/mobile/src/theme/에 넣고 pnpm tokens:build를 실행하세요.',
+    });
+  };
+
+  $('close').onclick = () => send({ type: 'close' });
+</script>
