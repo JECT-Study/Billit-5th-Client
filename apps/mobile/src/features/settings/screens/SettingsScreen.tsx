@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/shared/ui/ScreenHeader';
+import { Text } from '@/shared/ui/Text';
 
 export function SettingsScreen() {
   function handlePressTripList() {
@@ -18,20 +19,23 @@ export function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} className="bg-canvas flex-1">
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      className="bg-surface-default flex-1"
+    >
       <ScreenHeader title="마이" />
       <Text
         accessibilityRole="header"
-        className="text-gray-008 px-6 pb-2 pt-4 text-xl font-bold"
+        className="text-primary text-heading-2 px-24 pb-8 pt-16 font-bold"
       >
         설정
       </Text>
-      <View className="bg-surface items-center justify-center py-12">
+      <View className="bg-sky-10 items-center justify-center py-48">
         <Text className="text-center font-normal">사용자 프로필 View</Text>
       </View>
       <Text
         accessibilityRole="header"
-        className="text-gray-008 px-5 pb-2 pt-4 text-xl font-bold leading-7"
+        className="text-primary text-heading-2 px-20 pb-8 pt-16 font-bold"
       >
         내 공간
       </Text>
@@ -63,11 +67,11 @@ function SettingsLinkRow({ label, onPress }: SettingsLinkRowProps) {
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      className="border-line h-14 flex-row items-center justify-between border-b px-6"
+      className="border-default h-58 flex-row items-center justify-between border-b px-24"
     >
-      <Text className="text-gray-008 text-base font-normal">{label}</Text>
+      <Text className="text-primary text-body-1 font-normal">{label}</Text>
       <View accessible={false}>
-        <Text className="text-gray-004 text-2xl font-normal leading-6">›</Text>
+        <Text className="text-icon-inactive text-title-3 font-normal">›</Text>
       </View>
     </Pressable>
   );

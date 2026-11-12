@@ -1,4 +1,6 @@
-import { Pressable, Text } from 'react-native';
+import { Pressable } from 'react-native';
+
+import { Text } from '@/shared/ui/Text';
 
 type PrimaryButtonProps = {
   label: string;
@@ -15,9 +17,11 @@ export function PrimaryButton({ label, onPress }: PrimaryButtonProps) {
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={handlePress}
-      className="bg-primary h-14 items-center justify-center rounded-xl"
+      className="bg-action-primary-background h-58 rounded-12 items-center justify-center"
     >
-      <Text className="text-canvas text-base font-semibold">{label}</Text>
+      <Text className="text-action-primary-foreground text-body-1 font-semibold">
+        {label}
+      </Text>
     </Pressable>
   );
 }

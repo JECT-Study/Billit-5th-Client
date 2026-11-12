@@ -1,40 +1,45 @@
 const plugin = require('tailwindcss/plugin');
-const sharedPreset = require('@billit/config/tailwind-preset');
+
+const jiti = require('jiti')(require.resolve('./tailwind.config.js'));
+const tokens = jiti('./src/theme/theme.generated.ts');
+
+const px = (value) => `${value}px`;
+const mapPx = (values) =>
+  Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [key, px(value)]),
+  );
 
 const suitByWeight = {
-  thin: 'SUIT-Thin',
-  extralight: 'SUIT-ExtraLight',
-  light: 'SUIT-Light',
-  normal: 'SUIT-Regular',
-  medium: 'SUIT-Medium',
-  semibold: 'SUIT-SemiBold',
-  bold: 'SUIT-Bold',
-  extrabold: 'SUIT-ExtraBold',
-  black: 'SUIT-Heavy',
+  normal: tokens.FONT_FAMILY['suit-regular'],
+  medium: tokens.FONT_FAMILY['suit-medium'],
+  semibold: tokens.FONT_FAMILY['suit-semibold'],
+  bold: tokens.FONT_FAMILY['suit-bold'],
 };
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
-  presets: [require('nativewind/preset'), sharedPreset],
+  content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
+  presets: [require('nativewind/preset')],
   theme: {
+    spacing: mapPx(tokens.SPACING),
     extend: {
-      fontFamily: {
-        sans: ['SUIT-Regular'],
-      },
-      colors: {
-        gray: {
-          '004': '#B9BBC0',
-          '008': '#292C2D',
-        },
-        secondary: '#616366',
-        primary: '#669EC3',
-        kakao: '#FCE757',
-        apple: '#181818',
-        canvas: '#FFFFFF',
-        surface: '#E8F4FB',
-        line: '#E6E8EB',
-      },
+      colors: tokens.COLORS,
+      textColor: tokens.TEXT_COLORS,
+      borderColor: tokens.BORDER_COLORS,
+      borderRadius: mapPx(tokens.RADIUS),
+      fontSize: Object.fromEntries(
+        Object.entries(tokens.FONT_SIZE).map(([key, [size, metrics]]) => [
+          key,
+          [
+            px(size),
+            {
+              lineHeight: px(metrics.lineHeight),
+              letterSpacing: px(metrics.letterSpacing),
+            },
+          ],
+        ]),
+      ),
+      boxShadow: tokens.SHADOW,
     },
   },
   corePlugins: {
@@ -46,7 +51,7 @@ module.exports = {
         Object.fromEntries(
           Object.entries(suitByWeight).map(([weight, family]) => [
             `.font-${weight}`,
-            { 'font-family': family, 'font-weight': 'normal' },
+            { 'font-family': family },
           ]),
         ),
       );

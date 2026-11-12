@@ -9,7 +9,10 @@ export function FxScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} className="bg-canvas flex-1">
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      className="bg-surface-default flex-1"
+    >
       <NavigationHeader title="환율 관리" onPressBack={handlePressBack} />
     </SafeAreaView>
   );
