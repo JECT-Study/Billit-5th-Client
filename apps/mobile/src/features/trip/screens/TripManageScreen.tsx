@@ -8,12 +8,11 @@ export function TripManageScreen() {
     router.back();
   }
 
-  function handlePressEdit() {}
-
-  function handlePressLeave() {}
-
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} className="bg-canvas flex-1">
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      className="bg-surface-default flex-1"
+    >
       <NavigationHeader title="여행 목록 관리" onPressBack={handlePressBack} />
     </SafeAreaView>
   );

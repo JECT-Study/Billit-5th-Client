@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 import { PrimaryButton } from '@/shared/ui/PrimaryButton';
+import { Text } from '@/shared/ui/Text';
 
 const ONBOARDING_STEPS = [
   {
@@ -57,27 +58,27 @@ export function OnboardingScreen() {
   }
 
   return (
-    <SafeAreaView className="bg-canvas flex-1">
+    <SafeAreaView className="bg-surface-default flex-1">
       <NavigationHeader title="정보 입력" onPressBack={handlePressBack} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="다음 단계"
         onPress={handlePressBody}
-        className="flex-1 px-6 pt-8"
+        className="flex-1 px-24 pt-32"
       >
         <Text
           accessibilityRole="header"
-          className="text-gray-008 text-2xl font-semibold leading-9"
+          className="text-primary text-title-3 font-semibold"
         >
           {step.title}
         </Text>
-        <View className="bg-surface mt-8 flex-1 items-center justify-center rounded-3xl px-6">
-          <Text className="text-secondary text-center text-sm font-normal">
+        <View className="bg-sky-10 rounded-24 mt-32 flex-1 items-center justify-center px-24">
+          <Text className="text-secondary text-label-1 text-center font-normal">
             {step.description}
           </Text>
         </View>
       </Pressable>
-      <View className="px-6 pb-4 pt-6">
+      <View className="px-24 pb-16 pt-24">
         {isLastStep ? (
           <PrimaryButton
             label="동의하고 회원가입 완료하기"
@@ -88,9 +89,9 @@ export function OnboardingScreen() {
             accessibilityRole="button"
             accessibilityLabel="건너뛰기"
             onPress={handlePressSkip}
-            className="h-14 items-center justify-center"
+            className="h-58 items-center justify-center"
           >
-            <Text className="text-secondary text-base font-semibold">
+            <Text className="text-secondary text-body-1 font-semibold">
               건너뛰기
             </Text>
           </Pressable>
