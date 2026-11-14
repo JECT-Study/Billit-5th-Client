@@ -1,19 +1,27 @@
 import { Image, type ImageSource } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import BillitLogo from '@/assets/images/login/logo.svg';
 import { Text } from '@/shared/ui/Text';
+import { parseApiError } from '@/lib/apiError';
 import { COLORS } from '@/theme/theme.generated';
+
+import { loginWithProvider } from '@/features/auth/services/loginWithProvider';
+import {
+  SocialLoginCancelledError,
+  type SocialProvider,
+} from '@/features/auth/services/socialSignIn';
 
 // Figma 로컬 페인트 스타일 "bg" (white → #CEEEFF, 위에서 아래로). 아직 토큰으로 등록되지 않은 값임
 const BACKGROUND_GRADIENT_END = '#CEEEFF';
 
 const SOCIAL_LOGIN_OPTIONS = [
   {
-    id: 'google',
+    id: 'GOOGLE',
     label: '구글로 계속하기',
     logo: require('@/assets/images/login/google.png') as ImageSource,
     logoSize: 20,
@@ -21,7 +29,7 @@ const SOCIAL_LOGIN_OPTIONS = [
     textClassName: 'text-strong',
   },
   {
-    id: 'apple',
+    id: 'APPLE',
     label: '애플로 계속하기',
     logo: require('@/assets/images/login/apple.png') as ImageSource,
     logoSize: 24,
@@ -29,7 +37,7 @@ const SOCIAL_LOGIN_OPTIONS = [
     textClassName: 'text-white',
   },
   {
-    id: 'kakao',
+    id: 'KAKAO',
     label: '카카오로 계속하기',
     logo: require('@/assets/images/login/kakao.png') as ImageSource,
     logoSize: 24,
@@ -39,8 +47,26 @@ const SOCIAL_LOGIN_OPTIONS = [
 ] as const;
 
 export function LoginScreen() {
-  function handlePressSocialLogin() {
-    router.push('/signup');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  async function handlePressSocialLogin(provider: SocialProvider) {
+    if (isLoggingIn) {
+      return;
+    }
+    setIsLoggingIn(true);
+    try {
+      const outcome = await loginWithProvider(provider);
+      router.replace(outcome === 'AUTHENTICATED' ? '/trips' : '/signup');
+    } catch (error) {
+      if (!(error instanceof SocialLoginCancelledError)) {
+        Alert.alert(
+          '로그인에 실패했어요',
+          parseApiError(error)?.message ?? '잠시 후 다시 시도해주세요.',
+        );
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
   }
 
   return (
@@ -66,7 +92,7 @@ export function LoginScreen() {
               logoSize={option.logoSize}
               buttonClassName={option.buttonClassName}
               textClassName={option.textClassName}
-              onPress={handlePressSocialLogin}
+              onPress={() => handlePressSocialLogin(option.id)}
             />
           ))}
         </View>
