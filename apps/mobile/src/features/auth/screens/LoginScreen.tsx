@@ -1,7 +1,7 @@
 import { Image, type ImageSource } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, Platform, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -46,6 +46,11 @@ const SOCIAL_LOGIN_OPTIONS = [
   },
 ] as const;
 
+// 애플 로그인은 iOS에서만 지원
+const VISIBLE_SOCIAL_LOGIN_OPTIONS = SOCIAL_LOGIN_OPTIONS.filter(
+  (option) => option.id !== 'APPLE' || Platform.OS === 'ios',
+);
+
 export function LoginScreen() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -84,7 +89,7 @@ export function LoginScreen() {
           <BillitLogo />
         </View>
         <View className="mb-58 gap-18 pb-58 px-24">
-          {SOCIAL_LOGIN_OPTIONS.map((option) => (
+          {VISIBLE_SOCIAL_LOGIN_OPTIONS.map((option) => (
             <SocialLoginButton
               key={option.id}
               label={option.label}
