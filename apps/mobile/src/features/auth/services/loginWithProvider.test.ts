@@ -1,3 +1,4 @@
+import { clearAppleFullName } from '@/features/auth/services/appleFullNameCache';
 import { socialLogin } from '@/features/auth/services/authApi';
 import {
   saveAuthTokens,
@@ -7,6 +8,7 @@ import { loginWithProvider } from '@/features/auth/services/loginWithProvider';
 import { saveRecentLoginProvider } from '@/features/auth/services/recentLoginStorage';
 import { requestSocialCredential } from '@/features/auth/services/socialSignIn';
 
+jest.mock('@/features/auth/services/appleFullNameCache');
 jest.mock('@/features/auth/services/authApi');
 jest.mock('@/features/auth/services/authStorage');
 jest.mock('@/features/auth/services/recentLoginStorage');
@@ -72,6 +74,31 @@ describe('loginWithProvider', () => {
       accessToken: 'access',
       refreshToken: 'refresh',
     });
+  });
+
+  it('애플 로그인이 BE에서 성공하면 보관해 둔 이름을 비운다', async () => {
+    jest.mocked(requestSocialCredential).mockResolvedValue({
+      provider: 'APPLE',
+      idToken: 'id-token',
+      authorizationCode: 'code',
+      fullName: '홍길동',
+    });
+    jest.mocked(socialLogin).mockResolvedValue({
+      status: 'REGISTRATION_REQUIRED',
+      registrationToken: 'registration',
+    });
+
+    await loginWithProvider('APPLE');
+
+    expect(clearAppleFullName).toHaveBeenCalled();
+  });
+
+  it('애플 로그인이 BE에서 실패하면 재시도를 위해 이름을 남겨 둔다', async () => {
+    jest.mocked(socialLogin).mockRejectedValue(new Error('503'));
+
+    await expect(loginWithProvider('APPLE')).rejects.toThrow('503');
+
+    expect(clearAppleFullName).not.toHaveBeenCalled();
   });
 
   it('BE 요청이 실패하면 에러를 그대로 전달하고 저장하지 않는다', async () => {

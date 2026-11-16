@@ -3,6 +3,7 @@ import { initializeKakaoSDK } from '@react-native-kakao/core';
 import { login as loginWithKakaoSdk } from '@react-native-kakao/user';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
+import { resolveAppleFullName } from '@/features/auth/services/appleFullNameCache';
 import { socialConfig } from '@/features/auth/services/socialConfig';
 
 export type SocialProvider = 'GOOGLE' | 'KAKAO' | 'APPLE';
@@ -102,13 +103,13 @@ async function requestAppleCredential(): Promise<SocialCredential> {
     throw new Error('애플 identityToken 또는 authorizationCode가 없습니다.');
   }
 
-  // 이름은 첫 로그인 때만 내려옴
-  const fullName = [
-    credential.fullName?.familyName,
-    credential.fullName?.givenName,
-  ]
-    .filter(Boolean)
-    .join('');
+  // 이름은 첫 로그인 때만 내려옴. BE 로그인 실패 후 재시도면 기억해 둔 이름을 쓴다
+  const fullName = resolveAppleFullName(
+    credential.user,
+    [credential.fullName?.familyName, credential.fullName?.givenName]
+      .filter(Boolean)
+      .join('') || null,
+  );
 
   return {
     provider: 'APPLE',

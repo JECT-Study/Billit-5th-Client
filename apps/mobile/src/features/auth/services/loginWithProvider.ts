@@ -1,3 +1,4 @@
+import { clearAppleFullName } from '@/features/auth/services/appleFullNameCache';
 import { socialLogin } from '@/features/auth/services/authApi';
 import {
   saveAuthTokens,
@@ -17,6 +18,10 @@ export async function loginWithProvider(
 ): Promise<LoginOutcome> {
   const credential = await requestSocialCredential(provider);
   const result = await socialLogin(credential);
+  if (provider === 'APPLE') {
+    // BE가 이름을 받았으니 더 보관하지 않는다
+    clearAppleFullName();
+  }
   try {
     await saveRecentLoginProvider(provider);
   } catch {}
