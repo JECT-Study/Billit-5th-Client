@@ -3,6 +3,7 @@ import {
   saveAuthTokens,
   setRegistrationToken,
 } from '@/features/auth/services/authStorage';
+import { saveRecentLoginProvider } from '@/features/auth/services/recentLoginStorage';
 import {
   requestSocialCredential,
   type SocialProvider,
@@ -16,6 +17,7 @@ export async function loginWithProvider(
 ): Promise<LoginOutcome> {
   const credential = await requestSocialCredential(provider);
   const result = await socialLogin(credential);
+  await saveRecentLoginProvider(provider);
 
   if (result.status === 'AUTHENTICATED') {
     await saveAuthTokens({

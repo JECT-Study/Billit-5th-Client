@@ -4,10 +4,12 @@ import {
   setRegistrationToken,
 } from '@/features/auth/services/authStorage';
 import { loginWithProvider } from '@/features/auth/services/loginWithProvider';
+import { saveRecentLoginProvider } from '@/features/auth/services/recentLoginStorage';
 import { requestSocialCredential } from '@/features/auth/services/socialSignIn';
 
 jest.mock('@/features/auth/services/authApi');
 jest.mock('@/features/auth/services/authStorage');
+jest.mock('@/features/auth/services/recentLoginStorage');
 // 네이티브 SDK 모듈이 jest에 없어서 실제 모듈을 불러오지 않고 대체한다
 jest.mock('@/features/auth/services/socialSignIn', () => ({
   requestSocialCredential: jest.fn(),
@@ -36,6 +38,7 @@ describe('loginWithProvider', () => {
       refreshToken: 'refresh',
     });
     expect(setRegistrationToken).toHaveBeenCalledWith(null);
+    expect(saveRecentLoginProvider).toHaveBeenCalledWith('GOOGLE');
   });
 
   it('가입이 필요하면 가입 토큰을 보관하고 토큰은 저장하지 않는다', async () => {
@@ -50,6 +53,7 @@ describe('loginWithProvider', () => {
 
     expect(setRegistrationToken).toHaveBeenCalledWith('registration');
     expect(saveAuthTokens).not.toHaveBeenCalled();
+    expect(saveRecentLoginProvider).toHaveBeenCalledWith('KAKAO');
   });
 
   it('BE 요청이 실패하면 에러를 그대로 전달하고 저장하지 않는다', async () => {
@@ -59,5 +63,6 @@ describe('loginWithProvider', () => {
 
     expect(saveAuthTokens).not.toHaveBeenCalled();
     expect(setRegistrationToken).not.toHaveBeenCalled();
+    expect(saveRecentLoginProvider).not.toHaveBeenCalled();
   });
 });
