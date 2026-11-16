@@ -1,16 +1,18 @@
 import { Image, type ImageSource } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Platform, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import BillitLogo from '@/assets/images/login/logo.svg';
 import { Text } from '@/shared/ui/Text';
+import { Tooltip } from '@/shared/ui/Tooltip';
 import { parseApiError } from '@/lib/apiError';
 import { COLORS } from '@/theme/theme.generated';
 
 import { loginWithProvider } from '@/features/auth/services/loginWithProvider';
+import { getRecentLoginProvider } from '@/features/auth/services/recentLoginStorage';
 import {
   SocialLoginCancelledError,
   type SocialProvider,
@@ -53,6 +55,15 @@ const VISIBLE_SOCIAL_LOGIN_OPTIONS = SOCIAL_LOGIN_OPTIONS.filter(
 
 export function LoginScreen() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [recentProvider, setRecentProvider] = useState<SocialProvider | null>(
+    null,
+  );
+
+  useEffect(() => {
+    getRecentLoginProvider()
+      .then(setRecentProvider)
+      .catch(() => {});
+  }, []);
 
   async function handlePressSocialLogin(provider: SocialProvider) {
     if (isLoggingIn) {
@@ -97,6 +108,7 @@ export function LoginScreen() {
               logoSize={option.logoSize}
               buttonClassName={option.buttonClassName}
               textClassName={option.textClassName}
+              isRecent={option.id === recentProvider}
               onPress={() => handlePressSocialLogin(option.id)}
             />
           ))}
@@ -128,6 +140,7 @@ type SocialLoginButtonProps = {
   logoSize: number;
   buttonClassName: string;
   textClassName: string;
+  isRecent: boolean;
   onPress: () => void;
 };
 
@@ -137,6 +150,7 @@ function SocialLoginButton({
   logoSize,
   buttonClassName,
   textClassName,
+  isRecent,
   onPress,
 }: SocialLoginButtonProps) {
   function handlePress() {
@@ -144,26 +158,34 @@ function SocialLoginButton({
   }
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={handlePress}
-      className={`rounded-12 flex-row items-center gap-10 px-10 py-12 ${buttonClassName}`}
-    >
-      <View className="h-24 w-24 items-center justify-center">
-        <Image
-          source={logo}
-          style={{ width: logoSize, height: logoSize }}
-          contentFit="contain"
-          accessible={false}
-        />
-      </View>
-      <Text
-        className={`text-headline-1 flex-1 text-center font-semibold ${textClassName}`}
+    <View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isRecent ? `${label}, 최근 로그인` : label}
+        onPress={handlePress}
+        className={`rounded-12 flex-row items-center gap-10 px-10 py-12 ${buttonClassName}`}
       >
-        {label}
-      </Text>
-      <View className="h-24 w-24" />
-    </Pressable>
+        <View className="h-24 w-24 items-center justify-center">
+          <Image
+            source={logo}
+            style={{ width: logoSize, height: logoSize }}
+            contentFit="contain"
+            accessible={false}
+          />
+        </View>
+        <Text
+          className={`text-headline-1 flex-1 text-center font-semibold ${textClassName}`}
+        >
+          {label}
+        </Text>
+        <View className="h-24 w-24" />
+      </Pressable>
+      {isRecent && (
+        // 버튼 오른쪽 위에 걸쳐 표시. 꼬리 끝이 버튼 위쪽 모서리에 닿는다
+        <View className="absolute -top-28 right-16">
+          <Tooltip label="최근 로그인" />
+        </View>
+      )}
+    </View>
   );
 }
