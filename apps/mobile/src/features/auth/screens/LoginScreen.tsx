@@ -109,6 +109,7 @@ export function LoginScreen() {
               buttonClassName={option.buttonClassName}
               textClassName={option.textClassName}
               isRecent={option.id === recentProvider}
+              disabled={isLoggingIn}
               onPress={() => handlePressSocialLogin(option.id)}
             />
           ))}
@@ -141,6 +142,7 @@ type SocialLoginButtonProps = {
   buttonClassName: string;
   textClassName: string;
   isRecent: boolean;
+  disabled: boolean;
   onPress: () => void;
 };
 
@@ -151,6 +153,7 @@ function SocialLoginButton({
   buttonClassName,
   textClassName,
   isRecent,
+  disabled,
   onPress,
 }: SocialLoginButtonProps) {
   function handlePress() {
@@ -162,8 +165,10 @@ function SocialLoginButton({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={isRecent ? `${label}, 최근 로그인` : label}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
         onPress={handlePress}
-        className={`rounded-12 flex-row items-center gap-10 px-10 py-12 ${buttonClassName}`}
+        className={`rounded-12 flex-row items-center gap-10 px-10 py-12 ${buttonClassName} ${disabled ? 'opacity-50' : ''}`}
       >
         <View className="h-24 w-24 items-center justify-center">
           <Image
