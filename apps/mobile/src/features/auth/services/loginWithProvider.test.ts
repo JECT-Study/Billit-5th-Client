@@ -56,6 +56,24 @@ describe('loginWithProvider', () => {
     expect(saveRecentLoginProvider).toHaveBeenCalledWith('KAKAO');
   });
 
+  it('최근 로그인 저장이 실패해도 토큰을 저장하고 AUTHENTICATED를 돌려준다', async () => {
+    jest.mocked(socialLogin).mockResolvedValue({
+      status: 'AUTHENTICATED',
+      accessToken: 'access',
+      refreshToken: 'refresh',
+    });
+    jest
+      .mocked(saveRecentLoginProvider)
+      .mockRejectedValue(new Error('SecureStore 오류'));
+
+    await expect(loginWithProvider('GOOGLE')).resolves.toBe('AUTHENTICATED');
+
+    expect(saveAuthTokens).toHaveBeenCalledWith({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+    });
+  });
+
   it('BE 요청이 실패하면 에러를 그대로 전달하고 저장하지 않는다', async () => {
     jest.mocked(socialLogin).mockRejectedValue(new Error('401'));
 

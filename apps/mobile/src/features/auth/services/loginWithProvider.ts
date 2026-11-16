@@ -17,7 +17,9 @@ export async function loginWithProvider(
 ): Promise<LoginOutcome> {
   const credential = await requestSocialCredential(provider);
   const result = await socialLogin(credential);
-  await saveRecentLoginProvider(provider);
+  try {
+    await saveRecentLoginProvider(provider);
+  } catch {}
 
   if (result.status === 'AUTHENTICATED') {
     await saveAuthTokens({
