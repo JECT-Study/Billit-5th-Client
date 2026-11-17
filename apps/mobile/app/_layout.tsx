@@ -1,11 +1,13 @@
 import '@/global.css';
 import '@/shared/ui/cssInterop';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { router, Stack, usePathname, useSegments } from 'expo-router';
 import { useEffect, useRef } from 'react';
 
 import { apiClient } from '@/lib/api';
+import { queryClient } from '@/lib/queryClient';
 
 import { onSessionExpired } from '@/features/auth/services/sessionEvents';
 import { attachTokenRefresh } from '@/features/auth/services/tokenRefresh';
@@ -66,11 +68,13 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-      <Stack.Screen name="(flows)" />
-      <Stack.Screen name="(modals)" options={{ presentation: 'modal' }} />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="(flows)" />
+        <Stack.Screen name="(modals)" options={{ presentation: 'modal' }} />
+      </Stack>
+    </QueryClientProvider>
   );
 }
