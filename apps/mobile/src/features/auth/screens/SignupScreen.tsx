@@ -1,17 +1,23 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, BackHandler, Platform, View } from 'react-native';
+import { Alert, BackHandler, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { parseApiError } from '@/lib/apiError';
+import { Button } from '@/shared/ui/Button';
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
-import { PrimaryButton } from '@/shared/ui/PrimaryButton';
 
+import { SignupAgreementList } from '@/features/auth/components/SignupAgreementList';
 import { useCompleteRegistrationMutation } from '@/features/auth/hooks/useCompleteRegistrationMutation';
 import { useRegistrationQuery } from '@/features/auth/hooks/useRegistrationQuery';
+import type { RegistrationTerms } from '@/features/auth/registrationInfoSchema';
 import { RegistrationTokenExpiredError } from '@/features/auth/registrationTokenExpiredError';
 import { getRegistrationToken } from '@/features/auth/services/authStorage';
 import { clearRegistrationSession } from '@/features/auth/services/clearRegistrationSession';
+import {
+  isTermsContentUrl,
+  openTermsContent,
+} from '@/features/auth/services/openTermsContent';
 import {
   createSignupFormSchema,
   toCompleteRegistrationRequest,
@@ -82,6 +88,36 @@ export function SignupScreen() {
     );
     return () => subscription.remove();
   }, [handlePressBack]);
+
+  function handleToggleAgeEligible() {
+    setForm((current) => ({
+      ...current,
+      isAgeEligible: !current.isAgeEligible,
+    }));
+  }
+
+  function handleToggleTerms(termsId: string) {
+    setForm((current) => ({
+      ...current,
+      agreements: {
+        ...current.agreements,
+        [termsId]: current.agreements[termsId] !== true,
+      },
+    }));
+  }
+
+  async function handlePressTermsDetail(terms: RegistrationTerms) {
+    // 약관 주소는 서버(contentUrl)가 준다. Notion 게시 주소가 등록되면 앱 수정 없이 열린다.
+    if (!isTermsContentUrl(terms.contentUrl)) {
+      Alert.alert('약관 내용을 준비하고 있어요.');
+      return;
+    }
+    try {
+      await openTermsContent(terms.contentUrl);
+    } catch {
+      Alert.alert('약관을 열지 못했어요.', '잠시 후 다시 시도해주세요.');
+    }
+  }
 
   function showExpiredAndLeave() {
     clearRegistrationSession();
@@ -211,9 +247,23 @@ export function SignupScreen() {
   return (
     <SafeAreaView className="bg-surface-default flex-1">
       <NavigationHeader title="정보 입력" onPressBack={handlePressBack} />
-      <View className="flex-1" />
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-28 pt-24 pb-24"
+      >
+        {registrationQuery.data && (
+          <SignupAgreementList
+            terms={registrationQuery.data.terms}
+            isAgeEligible={form.isAgeEligible}
+            agreements={form.agreements}
+            onToggleAgeEligible={handleToggleAgeEligible}
+            onToggleTerms={handleToggleTerms}
+            onPressTermsDetail={handlePressTermsDetail}
+          />
+        )}
+      </ScrollView>
       <View className="px-24 pb-16">
-        <PrimaryButton
+        <Button
           label="동의하고 회원가입 완료하기"
           onPress={handlePressCompleteSignup}
         />
