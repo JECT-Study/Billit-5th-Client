@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+import { registrationTokenStorage } from '@/lib/registrationTokenStorage';
 import { mobileTokenStorage } from '@/lib/tokenStorage';
 import type { AuthTokens } from '@/features/auth/types';
 
@@ -50,13 +51,11 @@ export async function clearAuthTokens() {
   await setRefreshToken(null);
 }
 
-// 가입 전용 토큰은 가입이 끝날 때까지만 필요해서 저장하지 않고 메모리에 둔다
-let registrationToken: string | null = null;
-
+// setToken이 반환되기 전에 메모리 저장을 끝내므로 await하지 않는다.
 export function setRegistrationToken(token: string | null) {
-  registrationToken = token;
+  void registrationTokenStorage.setToken(token);
 }
 
 export function getRegistrationToken() {
-  return registrationToken;
+  return registrationTokenStorage.getToken();
 }
