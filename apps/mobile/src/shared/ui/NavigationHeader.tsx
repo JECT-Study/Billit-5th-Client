@@ -1,5 +1,6 @@
 import { Pressable, View } from 'react-native';
 
+import { CaretLeftMdIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 
 type NavigationHeaderProps = {
@@ -23,7 +24,7 @@ export function NavigationHeader({
         onPress={handlePressBack}
         className="h-48 w-48 items-center justify-center"
       >
-        <Text className="text-primary text-title-2 font-normal">‹</Text>
+        <CaretLeftMdIcon />
       </Pressable>
       <Text
         accessibilityRole="header"
