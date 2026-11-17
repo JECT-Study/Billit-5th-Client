@@ -53,7 +53,6 @@ function signupForm(
   overrides: Partial<SignupFormValues> = {},
 ): SignupFormValues {
   return {
-    nickname: '김빌릿',
     isAgeEligible: true,
     agreements: {
       [requiredTermsId]: true,
@@ -64,39 +63,6 @@ function signupForm(
 }
 
 describe('createSignupFormSchema', () => {
-  function parseNickname(nickname: string) {
-    return schema.safeParse(signupForm({ nickname }));
-  }
-
-  it('닉네임이 비어 있으면 통과한다', () => {
-    expect(parseNickname('').success).toBe(true);
-  });
-
-  it('닉네임 1자는 통과한다', () => {
-    expect(parseNickname('가').success).toBe(true);
-  });
-
-  it('닉네임 10자는 통과한다', () => {
-    expect(parseNickname('가'.repeat(10)).success).toBe(true);
-  });
-
-  it('닉네임 11자는 통과하지 않는다', () => {
-    expect(parseNickname('가'.repeat(11)).success).toBe(false);
-  });
-
-  it('닉네임 특수문자는 통과하지 않는다', () => {
-    expect(parseNickname('김빌릿!').success).toBe(false);
-  });
-
-  it('공백만 있는 닉네임은 trim 후 통과한다', () => {
-    const result = parseNickname('   ');
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.nickname).toBe('');
-    }
-  });
-
   it('필수 약관에 동의하지 않으면 통과하지 않는다', () => {
     const result = schema.safeParse(
       signupForm({
@@ -123,11 +89,8 @@ describe('toCompleteRegistrationRequest', () => {
     setAppVersion('1.0.0');
   });
 
-  it('빈 닉네임은 키를 생략하고 선택 약관은 미동의로 보내며 survey는 넣지 않는다', () => {
-    const request = toCompleteRegistrationRequest(
-      signupForm({ nickname: '' }),
-      terms,
-    );
+  it('닉네임과 survey는 요청에 넣지 않고 선택 약관은 미동의로 보낸다', () => {
+    const request = toCompleteRegistrationRequest(signupForm(), terms);
 
     expect(request).not.toHaveProperty('nickname');
     expect(request).not.toHaveProperty('survey');

@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { parseApiError } from '@/lib/apiError';
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 import { PrimaryButton } from '@/shared/ui/PrimaryButton';
-import { Text } from '@/shared/ui/Text';
 
 import { useCompleteRegistrationMutation } from '@/features/auth/hooks/useCompleteRegistrationMutation';
 import { useRegistrationQuery } from '@/features/auth/hooks/useRegistrationQuery';
@@ -19,13 +18,11 @@ import {
 } from '@/features/auth/signupForm';
 
 type SignupDraft = {
-  nickname: string;
   isAgeEligible: boolean;
   agreements: Record<string, boolean>;
 };
 
 const initialSignupDraft: SignupDraft = {
-  nickname: '',
   isAgeEligible: false,
   agreements: {},
 };
@@ -214,14 +211,7 @@ export function SignupScreen() {
   return (
     <SafeAreaView className="bg-surface-default flex-1">
       <NavigationHeader title="정보 입력" onPressBack={handlePressBack} />
-      <View className="flex-1 px-24 pt-24">
-        <Text
-          accessibilityRole="header"
-          className="text-primary text-heading-2 font-semibold"
-        >
-          회원 정보 입력 및 동의
-        </Text>
-      </View>
+      <View className="flex-1" />
       <View className="px-24 pb-16">
         <PrimaryButton
           label="동의하고 회원가입 완료하기"
