@@ -34,6 +34,11 @@ export async function getRefreshToken(): Promise<string | null> {
   return SecureStore.getItemAsync(refreshTokenKey);
 }
 
+// Access Token이 만료돼도 Refresh Token이 있으면 첫 회원 API에서 갱신되므로 로그인 상태로 본다
+export async function hasStoredSession(): Promise<boolean> {
+  return (await getRefreshToken()) !== null;
+}
+
 // access는 mobileTokenStorage에, refresh는 별도 키에 저장
 export async function saveAuthTokens(tokens: AuthTokens) {
   await setRefreshToken(tokens.refreshToken);
