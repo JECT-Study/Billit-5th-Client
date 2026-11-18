@@ -36,16 +36,27 @@ const initialSignupDraft: SignupDraft = {
 export function SignupScreen() {
   const registrationQuery = useRegistrationQuery();
   const completeRegistrationMutation = useCompleteRegistrationMutation();
+  const isRegistrationPending = completeRegistrationMutation.isPending;
   const [form, setForm] = useState<SignupDraft>(initialSignupDraft);
   const [isRegistrationTokenValid, setIsRegistrationTokenValid] = useState<
     boolean | null
   >(null);
   const isSubmittingRef = useRef(false);
+  const requiredTerms =
+    registrationQuery.data?.terms.filter((term) => term.isRequired) ?? [];
+  const isRequiredAgreementComplete =
+    registrationQuery.data !== undefined &&
+    form.isAgeEligible &&
+    requiredTerms.every((term) => form.agreements[term.termsId] === true);
 
   const handlePressBack = useCallback(() => {
+    // 요청이 끝난 뒤 성공 이동이 로그인 화면 위에서 /onboarding으로 이어지지 않게 막는다.
+    if (isRegistrationPending || isSubmittingRef.current) {
+      return;
+    }
     clearRegistrationSession();
     router.replace('/login');
-  }, []);
+  }, [isRegistrationPending]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -246,7 +257,11 @@ export function SignupScreen() {
 
   return (
     <SafeAreaView className="bg-surface-default flex-1">
-      <NavigationHeader title="정보 입력" onPressBack={handlePressBack} />
+      <NavigationHeader
+        title="정보 입력"
+        onPressBack={handlePressBack}
+        isBackDisabled={isRegistrationPending}
+      />
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-28 pt-24 pb-24"
@@ -266,6 +281,8 @@ export function SignupScreen() {
         <Button
           label="동의하고 회원가입 완료하기"
           onPress={handlePressCompleteSignup}
+          variant={isRequiredAgreementComplete ? 'primary' : 'secondary'}
+          isDisabled={isRegistrationPending}
         />
       </View>
     </SafeAreaView>
