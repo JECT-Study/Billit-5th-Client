@@ -1,5 +1,6 @@
 import { createApiClient } from '@billit/api';
 
+import { registrationTokenStorage } from '@/lib/registrationTokenStorage';
 import { mobileTokenStorage } from '@/lib/tokenStorage';
 
 export const apiBaseUrl =
@@ -17,4 +18,10 @@ export const publicApiClient = createApiClient({
     getToken: async () => null,
     setToken: async () => {},
   },
+});
+
+// 가입 전용 토큰만 붙인다. 회원용 apiClient와 토큰을 섞지 않는다.
+export const registrationApiClient = createApiClient({
+  baseURL: apiBaseUrl,
+  tokenStorage: registrationTokenStorage,
 });

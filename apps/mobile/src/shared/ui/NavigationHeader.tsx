@@ -1,15 +1,18 @@
 import { Pressable, View } from 'react-native';
 
+import { CaretLeftMdIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 
 type NavigationHeaderProps = {
   title: string;
   onPressBack: () => void;
+  isBackDisabled?: boolean;
 };
 
 export function NavigationHeader({
   title,
   onPressBack,
+  isBackDisabled = false,
 }: NavigationHeaderProps) {
   function handlePressBack() {
     onPressBack();
@@ -20,10 +23,12 @@ export function NavigationHeader({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="뒤로 가기"
+        accessibilityState={{ disabled: isBackDisabled }}
+        disabled={isBackDisabled}
         onPress={handlePressBack}
-        className="h-48 w-48 items-center justify-center"
+        className={`h-48 w-48 items-center justify-center ${isBackDisabled ? 'opacity-50' : ''}`}
       >
-        <Text className="text-primary text-title-2 font-normal">‹</Text>
+        <CaretLeftMdIcon />
       </Pressable>
       <Text
         accessibilityRole="header"
