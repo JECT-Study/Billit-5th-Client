@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { CtaButton } from '@/shared/ui/CtaButton';
+import { Button } from '@/shared/ui/Button';
 import { Text } from '@/shared/ui/Text';
 
 type TripEmptyStateProps = {
@@ -26,8 +26,8 @@ export function TripEmptyState({
         {'아직 진행 중인 여행이 없어요.\n여행을 생성해보세요.'}
       </Text>
       <View className="mt-[73px] gap-10">
-        <CtaButton label="첫 여행방 만들기" onPress={handlePressCreateTrip} />
-        <CtaButton
+        <Button label="첫 여행방 만들기" onPress={handlePressCreateTrip} />
+        <Button
           variant="light"
           label="초대코드로 참여하기"
           onPress={handlePressJoinWithInviteCode}
