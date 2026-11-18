@@ -5,9 +5,11 @@ import type { TokenStorage } from './tokenStorage';
 export function createApiClient(options: {
   baseURL: string;
   tokenStorage: TokenStorage;
+  timeoutMs?: number;
 }): AxiosInstance {
   const client = axios.create({
     baseURL: options.baseURL,
+    timeout: options.timeoutMs ?? 15000,
     headers: {
       'Content-Type': 'application/json',
     },
