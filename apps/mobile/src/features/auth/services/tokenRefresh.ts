@@ -10,6 +10,12 @@ import {
 import { notifySessionExpired } from '@/features/auth/services/sessionEvents';
 import type { AuthTokens } from '@/features/auth/types';
 
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    _retried?: boolean;
+  }
+}
+
 export class SessionExpiredError extends Error {
   constructor() {
     super('로그인이 만료되었습니다.');
@@ -70,8 +76,6 @@ export function refreshAccessToken(): Promise<string> {
   return refreshing;
 }
 
-const retriedRequests = new WeakSet<object>();
-
 // 회원 API가 401이면 토큰을 갱신하고 원래 요청을 한 번 다시 보낸다
 export function attachTokenRefresh(client: AxiosInstance) {
   client.interceptors.response.use(undefined, async (error: unknown) => {
@@ -79,13 +83,13 @@ export function attachTokenRefresh(client: AxiosInstance) {
       !isAxiosError(error) ||
       error.response?.status !== 401 ||
       !error.config ||
-      retriedRequests.has(error.config)
+      error.config._retried
     ) {
       throw error;
     }
 
     const config = error.config;
-    retriedRequests.add(config);
+    config._retried = true;
     const accessToken = await refreshAccessToken();
     config.headers.Authorization = `Bearer ${accessToken}`;
     return client(config);

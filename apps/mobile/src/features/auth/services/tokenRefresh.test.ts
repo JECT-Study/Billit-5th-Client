@@ -182,6 +182,27 @@ describe('attachTokenRefresh', () => {
     expect(refreshTokens).toHaveBeenCalledTimes(1);
   });
 
+  // axios는 요청마다 config를 새로 만들기 때문에(mergeConfig) 재시도 표시가 새 config에도 남아야 한다
+  it('재시도한 요청이 다시 401이면 갱신을 반복하지 않고 실패한다', async () => {
+    let memberRequestCount = 0;
+    const client = createAxios({
+      adapter: async (config) => {
+        memberRequestCount += 1;
+        // 고치기 전 코드가 무한 반복해도 테스트가 멈추도록 횟수를 제한한다
+        if (memberRequestCount > 5) {
+          throw new Error('too many requests');
+        }
+        throw httpError(401, config);
+      },
+    });
+    attachTokenRefresh(client);
+
+    await expect(client.get('/trips')).rejects.toThrow('401');
+
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+    expect(memberRequestCount).toBe(2);
+  });
+
   it('401이 아닌 오류는 갱신하지 않고 그대로 전달한다', async () => {
     const client = createAxios({
       adapter: async (config) => {
