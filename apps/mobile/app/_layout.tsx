@@ -5,6 +5,14 @@ import { useFonts } from 'expo-font';
 import { router, Stack, usePathname, useSegments } from 'expo-router';
 import { useEffect, useRef } from 'react';
 
+import { apiClient } from '@/lib/api';
+
+import { onSessionExpired } from '@/features/auth/services/sessionEvents';
+import { attachTokenRefresh } from '@/features/auth/services/tokenRefresh';
+
+// 회원 API가 401이면 토큰을 갱신하고 다시 보낸다
+attachTokenRefresh(apiClient);
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const unstable_settings = {
   initialRouteName: '(auth)',
@@ -32,6 +40,15 @@ export default function RootLayout() {
     pathname === '/login' ||
     pathname === '/signup' ||
     pathname === '/onboarding';
+
+  useEffect(
+    () =>
+      onSessionExpired(() => {
+        hasEnteredTabs.current = false;
+        router.replace('/login');
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (isInTabs) {

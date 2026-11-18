@@ -2,7 +2,33 @@ import type { InternalAxiosRequestConfig } from 'axios';
 
 import { createApiClient } from './createApiClient';
 
+const tokenStorage = {
+  async getToken() {
+    return null;
+  },
+  async setToken() {},
+};
+
 describe('createApiClient', () => {
+  it('sets a default timeout so requests do not wait forever', () => {
+    const client = createApiClient({
+      baseURL: 'http://localhost:8080',
+      tokenStorage,
+    });
+
+    expect(client.defaults.timeout).toBe(15000);
+  });
+
+  it('uses the given timeout', () => {
+    const client = createApiClient({
+      baseURL: 'http://localhost:8080',
+      tokenStorage,
+      timeoutMs: 3_000,
+    });
+
+    expect(client.defaults.timeout).toBe(3_000);
+  });
+
   it('adds a bearer token from storage', async () => {
     const client = createApiClient({
       baseURL: 'http://localhost:8080',
