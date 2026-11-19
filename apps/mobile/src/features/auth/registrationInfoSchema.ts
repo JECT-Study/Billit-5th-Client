@@ -10,7 +10,6 @@ export const registrationTermsSchema = z.object({
 // GET /api/v1/me/registration 응답 data
 export const registrationInfoSchema = z.object({
   status: z.literal('SIGNING_UP'),
-  socialDisplayName: z.string().nullable(),
   terms: z.array(registrationTermsSchema),
 });
 
