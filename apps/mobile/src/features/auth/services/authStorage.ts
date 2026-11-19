@@ -7,6 +7,13 @@ import type { AuthTokens } from '@/features/auth/types';
 
 const refreshTokenKey = 'billit.refreshToken';
 
+// 토큰을 지울 때마다 올린다. 진행 중이던 갱신이 끝났을 때 값이 바뀌었으면 그 사이 로그아웃·만료된 것이다.
+let sessionVersion = 0;
+
+export function getSessionVersion() {
+  return sessionVersion;
+}
+
 async function setRefreshToken(token: string | null) {
   if (Platform.OS === 'web') {
     if (typeof localStorage === 'undefined') {
@@ -47,6 +54,7 @@ export async function saveAuthTokens(tokens: AuthTokens) {
 }
 
 export async function clearAuthTokens() {
+  sessionVersion += 1;
   await mobileTokenStorage.setToken(null);
   await setRefreshToken(null);
 }

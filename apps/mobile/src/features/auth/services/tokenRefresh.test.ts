@@ -9,6 +9,7 @@ import { refreshTokens } from '@/features/auth/services/authApi';
 import {
   clearAuthTokens,
   getRefreshToken,
+  getSessionVersion,
   saveAuthTokens,
 } from '@/features/auth/services/authStorage';
 import { onSessionExpired } from '@/features/auth/services/sessionEvents';
@@ -105,6 +106,17 @@ describe('refreshAccessToken', () => {
     expect(clearAuthTokens).toHaveBeenCalled();
     expect(listener).toHaveBeenCalled();
     unsubscribe();
+  });
+
+  it('갱신 중에 로그아웃으로 토큰이 지워졌으면 새 토큰을 저장하지 않는다', async () => {
+    jest.mocked(getSessionVersion).mockReturnValueOnce(0).mockReturnValue(1);
+    jest.mocked(refreshTokens).mockResolvedValue(newTokens);
+
+    await expect(refreshAccessToken()).rejects.toBeInstanceOf(
+      SessionExpiredError,
+    );
+
+    expect(saveAuthTokens).not.toHaveBeenCalled();
   });
 
   it('저장된 Refresh Token이 없으면 바로 세션을 만료한다', async () => {

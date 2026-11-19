@@ -5,6 +5,7 @@ import { refreshTokens } from '@/features/auth/services/authApi';
 import {
   clearAuthTokens,
   getRefreshToken,
+  getSessionVersion,
   saveAuthTokens,
 } from '@/features/auth/services/authStorage';
 import { notifySessionExpired } from '@/features/auth/services/sessionEvents';
@@ -45,6 +46,7 @@ async function requestRefresh(refreshToken: string): Promise<AuthTokens> {
 }
 
 async function runRefresh(): Promise<string> {
+  const sessionVersion = getSessionVersion();
   const refreshToken = await getRefreshToken();
   if (!refreshToken) {
     return expireSession();
@@ -60,6 +62,11 @@ async function runRefresh(): Promise<string> {
       return expireSession();
     }
     throw error;
+  }
+
+  // 갱신 중에 로그아웃·만료로 토큰이 지워졌으면 새 토큰을 저장하지 않는다.
+  if (getSessionVersion() !== sessionVersion) {
+    throw new SessionExpiredError();
   }
 
   await saveAuthTokens(tokens);
