@@ -1,12 +1,12 @@
 ---
-name: Enhancement
+name: Refactor
 about: 리팩토링 및 기능 개선
-title: '[Enhancement]'
-labels: ['enhancement', 'refactor']
+title: '[Refactor]'
+labels: refactor
 assignees: ''
 ---
 
-## ⚡ 기능 개선 / 리팩토링 (Enhancement)
+## ⚡ 기능 개선 / 리팩토링 (Refactor)
 
 > 기존 기능의 성능 개선, UI/UX 향상, 리팩토링 및 코드 품질 개선 작업을 정의합니다.
 
