@@ -4,7 +4,6 @@ describe('registrationInfoSchema', () => {
   it('약관 주소가 URL 형식이 아니어도 응답을 통과시킨다', () => {
     const result = registrationInfoSchema.safeParse({
       status: 'SIGNING_UP',
-      socialDisplayName: null,
       terms: [
         {
           termsId: '1',
