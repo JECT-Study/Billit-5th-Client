@@ -48,6 +48,10 @@ export async function hasStoredSession(): Promise<boolean> {
 }
 
 // access는 mobileTokenStorage에, refresh는 별도 키에 저장
+export function getAccessToken() {
+  return mobileTokenStorage.getToken();
+}
+
 export async function saveAuthTokens(tokens: AuthTokens) {
   await setRefreshToken(tokens.refreshToken);
   await mobileTokenStorage.setToken(tokens.accessToken);
