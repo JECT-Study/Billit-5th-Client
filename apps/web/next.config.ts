@@ -14,6 +14,9 @@ const nextConfig = {
   },
   transpilePackages: ['@billit/api', '@billit/store', '@billit/validators'],
   agentRules: false,
+  experimental: {
+    agentUpgrade: 'security',
+  },
   async rewrites() {
     if (process.env.NODE_ENV !== 'development') return [];
     return [
