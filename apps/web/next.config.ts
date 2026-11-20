@@ -17,6 +17,8 @@ const nextConfig = {
   experimental: {
     agentUpgrade: 'security',
   },
+  // 개발 서버에서만 쓰임. 같은 와이파이의 휴대폰에서 접속해 확인할 때 필요
+  allowedDevOrigins: ['192.168.*.*'],
   async rewrites() {
     if (process.env.NODE_ENV !== 'development') return [];
     return [
