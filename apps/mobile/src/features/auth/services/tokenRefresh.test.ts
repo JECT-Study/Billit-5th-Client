@@ -10,13 +10,16 @@ import {
   clearAuthTokens,
   getRefreshToken,
   getSessionVersion,
-  saveAuthTokens,
+  saveAuthTokensIfVersion,
 } from '@/features/auth/services/authStorage';
 import { onSessionExpired } from '@/features/auth/services/sessionEvents';
 import {
   attachTokenRefresh,
+  blockRefresh,
   refreshAccessToken,
   SessionExpiredError,
+  unblockRefresh,
+  waitForPendingRefresh,
 } from '@/features/auth/services/tokenRefresh';
 
 jest.mock('@/features/auth/services/authApi');
@@ -48,7 +51,10 @@ function httpError(status: number, config?: InternalAxiosRequestConfig) {
 describe('refreshAccessToken', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    unblockRefresh();
     jest.mocked(getRefreshToken).mockResolvedValue('old-refresh');
+    jest.mocked(getSessionVersion).mockReturnValue(0);
+    jest.mocked(saveAuthTokensIfVersion).mockResolvedValue(true);
   });
 
   it('갱신에 성공하면 새 토큰 쌍을 저장하고 Access Token을 돌려준다', async () => {
@@ -57,7 +63,7 @@ describe('refreshAccessToken', () => {
     await expect(refreshAccessToken()).resolves.toBe('new-access');
 
     expect(refreshTokens).toHaveBeenCalledWith('old-refresh');
-    expect(saveAuthTokens).toHaveBeenCalledWith(newTokens);
+    expect(saveAuthTokensIfVersion).toHaveBeenCalledWith(newTokens, 0);
   });
 
   it('동시에 불려도 갱신 요청은 한 번만 보낸다', async () => {
@@ -108,15 +114,22 @@ describe('refreshAccessToken', () => {
     unsubscribe();
   });
 
-  it('갱신 중에 로그아웃으로 토큰이 지워졌으면 새 토큰을 저장하지 않는다', async () => {
-    jest.mocked(getSessionVersion).mockReturnValueOnce(0).mockReturnValue(1);
+  it('갱신을 시작할 때의 세션 버전으로 저장을 요청한다', async () => {
+    jest.mocked(getSessionVersion).mockReturnValue(3);
     jest.mocked(refreshTokens).mockResolvedValue(newTokens);
+
+    await refreshAccessToken();
+
+    expect(saveAuthTokensIfVersion).toHaveBeenCalledWith(newTokens, 3);
+  });
+
+  it('갱신 중에 로그아웃으로 토큰이 지워졌으면 저장되지 않고 세션 만료로 끝난다', async () => {
+    jest.mocked(refreshTokens).mockResolvedValue(newTokens);
+    jest.mocked(saveAuthTokensIfVersion).mockResolvedValue(false);
 
     await expect(refreshAccessToken()).rejects.toBeInstanceOf(
       SessionExpiredError,
     );
-
-    expect(saveAuthTokens).not.toHaveBeenCalled();
   });
 
   it('저장된 Refresh Token이 없으면 바로 세션을 만료한다', async () => {
@@ -131,11 +144,126 @@ describe('refreshAccessToken', () => {
   });
 });
 
+describe('waitForPendingRefresh', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    unblockRefresh();
+    jest.mocked(getRefreshToken).mockResolvedValue('old-refresh');
+    jest.mocked(saveAuthTokensIfVersion).mockResolvedValue(true);
+  });
+
+  it('진행 중인 갱신이 없으면 바로 끝난다', async () => {
+    await expect(waitForPendingRefresh()).resolves.toBeUndefined();
+  });
+
+  it('진행 중인 갱신이 저장까지 끝난 뒤에 끝난다', async () => {
+    let resolveRefresh: (tokens: typeof newTokens) => void = () => undefined;
+    jest.mocked(refreshTokens).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRefresh = resolve;
+      }),
+    );
+
+    const refresh = refreshAccessToken();
+    let hasWaited = false;
+    const waiting = waitForPendingRefresh().then(() => {
+      hasWaited = true;
+    });
+
+    await Promise.resolve();
+    expect(hasWaited).toBe(false);
+
+    resolveRefresh(newTokens);
+    await waiting;
+
+    expect(saveAuthTokensIfVersion).toHaveBeenCalled();
+    await expect(refresh).resolves.toBe('new-access');
+  });
+
+  it('진행 중인 갱신이 실패해도 에러를 던지지 않는다', async () => {
+    jest.mocked(refreshTokens).mockRejectedValue(httpError(401));
+
+    const refresh = refreshAccessToken();
+    await expect(waitForPendingRefresh()).resolves.toBeUndefined();
+    await expect(refresh).rejects.toBeInstanceOf(SessionExpiredError);
+  });
+});
+
+describe('로그아웃 중 갱신 차단', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    unblockRefresh();
+    jest.mocked(getRefreshToken).mockResolvedValue('old-refresh');
+    jest.mocked(getSessionVersion).mockReturnValue(0);
+    jest.mocked(saveAuthTokensIfVersion).mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    unblockRefresh();
+  });
+
+  it('막혀 있으면 서버에 갱신을 요청하지 않고 에러만 던진다', async () => {
+    blockRefresh();
+
+    await expect(refreshAccessToken()).rejects.toBeInstanceOf(
+      SessionExpiredError,
+    );
+
+    expect(refreshTokens).not.toHaveBeenCalled();
+    expect(clearAuthTokens).not.toHaveBeenCalled();
+  });
+
+  it('막기 전에 시작된 갱신에는 합류해 같은 결과를 받는다', async () => {
+    let resolveRefresh: (tokens: typeof newTokens) => void = () => undefined;
+    jest.mocked(refreshTokens).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRefresh = resolve;
+      }),
+    );
+
+    const first = refreshAccessToken();
+    blockRefresh();
+    const joined = refreshAccessToken();
+
+    resolveRefresh(newTokens);
+
+    await expect(first).resolves.toBe('new-access');
+    await expect(joined).resolves.toBe('new-access');
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+  });
+
+  it('차단을 풀면 다시 갱신한다', async () => {
+    jest.mocked(refreshTokens).mockResolvedValue(newTokens);
+    blockRefresh();
+    unblockRefresh();
+
+    await expect(refreshAccessToken()).resolves.toBe('new-access');
+  });
+
+  it('막혀 있을 때 회원 API가 401이면 원래 요청을 다시 보내지 않는다', async () => {
+    blockRefresh();
+    const adapter = jest.fn((config: InternalAxiosRequestConfig) =>
+      Promise.reject(httpError(401, config)),
+    );
+    const client = createAxios({ adapter });
+    attachTokenRefresh(client);
+
+    await expect(client.get('/api/v1/me')).rejects.toBeInstanceOf(
+      SessionExpiredError,
+    );
+
+    expect(adapter).toHaveBeenCalledTimes(1);
+    expect(refreshTokens).not.toHaveBeenCalled();
+  });
+});
+
 describe('attachTokenRefresh', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    unblockRefresh();
     jest.mocked(getRefreshToken).mockResolvedValue('old-refresh');
     jest.mocked(refreshTokens).mockResolvedValue(newTokens);
+    jest.mocked(saveAuthTokensIfVersion).mockResolvedValue(true);
   });
 
   // 401을 한 번 준 뒤, 새 Access Token으로 다시 오면 200을 주는 가짜 서버

@@ -52,15 +52,46 @@ export function getAccessToken() {
   return mobileTokenStorage.getToken();
 }
 
-export async function saveAuthTokens(tokens: AuthTokens) {
+// 토큰 저장·삭제를 한 줄로 세운다. RefreshToken·AccessToken를 쓰는 await 사이에 다른 저장·삭제가 끼어들면
+// 로그아웃 뒤에 AccessToken만 남는 등 토큰 쌍이 어긋날 수 있다.
+let storageQueue: Promise<unknown> = Promise.resolve();
+
+// 앞 작업이 실패해도 다음 작업은 실행한다.
+function withStorageLock<T>(task: () => Promise<T>): Promise<T> {
+  const result = storageQueue.then(task, task);
+  storageQueue = result.catch(() => undefined);
+  return result;
+}
+
+async function writeAuthTokens(tokens: AuthTokens) {
   await setRefreshToken(tokens.refreshToken);
   await mobileTokenStorage.setToken(tokens.accessToken);
 }
 
-export async function clearAuthTokens() {
-  sessionVersion += 1;
-  await mobileTokenStorage.setToken(null);
-  await setRefreshToken(null);
+export function saveAuthTokens(tokens: AuthTokens): Promise<void> {
+  return withStorageLock(() => writeAuthTokens(tokens));
+}
+
+// 버전 확인과 저장을 락 안에서 한 번에 한다. 그 사이 토큰이 지워졌으면 저장하지 않고 false를 돌려준다.
+export function saveAuthTokensIfVersion(
+  tokens: AuthTokens,
+  expectedVersion: number,
+): Promise<boolean> {
+  return withStorageLock(async () => {
+    if (sessionVersion !== expectedVersion) {
+      return false;
+    }
+    await writeAuthTokens(tokens);
+    return true;
+  });
+}
+
+export function clearAuthTokens(): Promise<void> {
+  return withStorageLock(async () => {
+    sessionVersion += 1;
+    await mobileTokenStorage.setToken(null);
+    await setRefreshToken(null);
+  });
 }
 
 // setToken이 반환되기 전에 메모리 저장을 끝내므로 await하지 않는다.
