@@ -1,5 +1,6 @@
+import * as Crypto from 'expo-crypto';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,6 +8,7 @@ import { TripCountrySelect } from '@/features/trip/components/TripCountrySelect'
 import { TripCurrencyField } from '@/features/trip/components/TripCurrencyField';
 import { TripDateRangeField } from '@/features/trip/components/TripDateRangeField';
 import { TripMemberCapacityField } from '@/features/trip/components/TripMemberCapacityField';
+import { useCreateTripMutation } from '@/features/trip/hooks/useCreateTripMutation';
 import {
   INITIAL_TRIP_DRAFT,
   TRIP_COUNTRIES,
@@ -16,11 +18,17 @@ import {
   type TripCurrency,
 } from '@/features/trip/tripCreationForm';
 import {
+  getTripCreationAttempt,
+  toCreateTripRequest,
+  type TripCreationAttempt,
+} from '@/features/trip/services/tripCreationRequest';
+import {
   getTripCreationTextFieldError,
   isTripStepInputEmpty,
   tripCreationSchema,
   validateTripCreationStep,
 } from '@/features/trip/tripCreationSchema';
+import { parseApiError } from '@/lib/apiError';
 import { Button } from '@/shared/ui/Button';
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 import { StepIndicator } from '@/shared/ui/StepIndicator';
@@ -39,6 +47,9 @@ export function TripCreateScreen() {
   const [step, setStep] = useState<TripCreationStep>(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRequiredErrorShown, setIsRequiredErrorShown] = useState(false);
+  const createTripMutation = useCreateTripMutation();
+  const attemptRef = useRef<TripCreationAttempt | null>(null);
+  const isSubmittingRef = useRef(false);
 
   // 입력 중에는 빈 값의 문구를 숨기고, 형식 오류는 스키마 메시지를 그대로 보여준다
   const nameErrorMessage = getTripCreationTextFieldError('name', draft.name);
@@ -64,7 +75,8 @@ export function TripCreateScreen() {
     setStep((current) => (current - 1) as TripCreationStep);
   }
 
-  function handlePressNext() {
+  async function handlePressNext() {
+    if (isSubmittingRef.current) return;
     if (!isStepValid) {
       // 비어 있으면 공통 토스트로 알리고, 형식이 틀린 경우는 입력창 아래 문구가 이미 보인다
       if (isTripStepInputEmpty(draft, step)) {
@@ -74,8 +86,37 @@ export function TripCreateScreen() {
       return;
     }
     if (isLastStep) {
-      // TODO: 여행방 생성 API(CreateTripRequest) 연동 후 요청을 보낸다
-      // 닉네임 중복이면 setToastMessage('중복된 닉네임입니다.')로 알린다
+      const result = tripCreationSchema.safeParse(draft);
+      if (!result.success) return;
+
+      const request = toCreateTripRequest(result.data);
+      const attempt = getTripCreationAttempt(
+        request,
+        attemptRef.current,
+        Crypto.randomUUID,
+      );
+      attemptRef.current = attempt;
+      isSubmittingRef.current = true;
+
+      try {
+        const trip = await createTripMutation.mutateAsync({
+          request,
+          idempotencyKey: attempt.idempotencyKey,
+        });
+        router.replace({
+          pathname: '/trips/created',
+          params: { tripId: trip.tripId, name: trip.name },
+        });
+      } catch (error) {
+        const apiError = parseApiError(error);
+        if (apiError?.code === 'TRIP_IDEMPOTENCY_KEY_REUSED') {
+          attemptRef.current = null;
+        }
+        setToastMessage(
+          apiError?.message ?? '여행방을 만들지 못했어요. 다시 시도해주세요.',
+        );
+        isSubmittingRef.current = false;
+      }
       return;
     }
     setIsRequiredErrorShown(false);
@@ -141,6 +182,7 @@ export function TripCreateScreen() {
           <NavigationHeader
             title="여행방 만들기"
             onPressBack={handlePressBack}
+            isBackDisabled={createTripMutation.isPending}
           />
           <StepIndicator
             stepCount={LAST_STEP + 1}
@@ -231,6 +273,7 @@ export function TripCreateScreen() {
             label={isLastStep ? '여행방 만들기' : '다음'}
             variant={isStepValid ? 'primary' : 'secondary'}
             onPress={handlePressNext}
+            isDisabled={createTripMutation.isPending}
           />
         </View>
       </KeyboardAvoidingView>

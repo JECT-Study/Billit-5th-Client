@@ -33,7 +33,7 @@ export function TripMemberCapacityField({
   return (
     <View className="z-10 gap-10">
       <Text className="text-secondary text-label-1 font-medium">
-        초대할 동행자는 몇 명인가요?
+        본인을 포함해 총 몇 명이 여행하나요?
       </Text>
       <DropdownField
         label={value ? `${value}명` : '인원 선택'}
