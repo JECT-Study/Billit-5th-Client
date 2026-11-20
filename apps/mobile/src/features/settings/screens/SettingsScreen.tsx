@@ -1,11 +1,15 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/shared/ui/ScreenHeader';
 import { Text } from '@/shared/ui/Text';
 
+import { useLogoutMutation } from '@/features/auth/hooks/useLogoutMutation';
+
 export function SettingsScreen() {
+  const logoutMutation = useLogoutMutation();
+
   function handlePressTripList() {
     router.push('/my/trips');
   }
@@ -16,6 +20,18 @@ export function SettingsScreen() {
 
   function handlePressExchangeRate() {
     router.push('/my/fx');
+  }
+
+  function handlePressLogout() {
+    Alert.alert('로그아웃할까요?', undefined, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '로그아웃',
+        onPress: () => {
+          logoutMutation.mutate();
+        },
+      },
+    ]);
   }
 
   return (
@@ -48,6 +64,11 @@ export function SettingsScreen() {
         label="내 환율 관리하기"
         onPress={handlePressExchangeRate}
       />
+      <SettingsLinkRow
+        label="로그아웃"
+        onPress={handlePressLogout}
+        isDisabled={logoutMutation.isPending}
+      />
     </SafeAreaView>
   );
 }
@@ -55,9 +76,14 @@ export function SettingsScreen() {
 type SettingsLinkRowProps = {
   label: string;
   onPress: () => void;
+  isDisabled?: boolean;
 };
 
-function SettingsLinkRow({ label, onPress }: SettingsLinkRowProps) {
+function SettingsLinkRow({
+  label,
+  onPress,
+  isDisabled = false,
+}: SettingsLinkRowProps) {
   function handlePress() {
     onPress();
   }
@@ -66,6 +92,9 @@ function SettingsLinkRow({ label, onPress }: SettingsLinkRowProps) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled: isDisabled }}
+      // 요청 중에는 눌러도 onPress가 호출되지 않는다
+      disabled={isDisabled}
       onPress={handlePress}
       className="border-default h-58 flex-row items-center justify-between border-b px-24"
     >
