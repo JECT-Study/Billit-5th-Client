@@ -37,6 +37,11 @@ import CrownFillSvg from '@/assets/icons/crown-fill.svg';
 import DocumentSvg from '@/assets/icons/document.svg';
 import EditSvg from '@/assets/icons/edit.svg';
 import FilterSvg from '@/assets/icons/filter.svg';
+import FlagCnSvg from '@/assets/icons/flag-cn.svg';
+import FlagEuSvg from '@/assets/icons/flag-eu.svg';
+import FlagJpSvg from '@/assets/icons/flag-jp.svg';
+import FlagKrSvg from '@/assets/icons/flag-kr.svg';
+import FlagUsSvg from '@/assets/icons/flag-us.svg';
 import HamburgerSvg from '@/assets/icons/hamburger.svg';
 import HeadphonesSvg from '@/assets/icons/headphones.svg';
 import HeartFillSvg from '@/assets/icons/heart-fill.svg';
@@ -161,6 +166,11 @@ export const CrownFillIcon = createIcon(CrownFillSvg, 24, 'CrownFillIcon'); // c
 export const DocumentIcon = createIcon(DocumentSvg, 24, 'DocumentIcon'); // document (2260:17099)
 export const EditIcon = createIcon(EditSvg, 24, 'EditIcon'); // edit (2260:17115)
 export const FilterIcon = createIcon(FilterSvg, 24, 'FilterIcon'); // filter (2260:17121)
+export const FlagCnIcon = createIcon(FlagCnSvg, 24, 'FlagCnIcon'); // Property 1=Flag, Property 2=CN (3064:32437)
+export const FlagEuIcon = createIcon(FlagEuSvg, 24, 'FlagEuIcon'); // Property 1=Flag, Property 2=EU (3064:32435)
+export const FlagJpIcon = createIcon(FlagJpSvg, 24, 'FlagJpIcon'); // Property 1=Flag, Property 2=JP (3064:32433)
+export const FlagKrIcon = createIcon(FlagKrSvg, 24, 'FlagKrIcon'); // Property 1=Flag, Property 2=KR (2260:17176)
+export const FlagUsIcon = createIcon(FlagUsSvg, 24, 'FlagUsIcon'); // Property 1=Flag, Property 2=US (3064:32431)
 export const HamburgerIcon = createIcon(HamburgerSvg, 24, 'HamburgerIcon'); // hamburger (2260:17087)
 export const HeadphonesIcon = createIcon(HeadphonesSvg, 24, 'HeadphonesIcon'); // headphones (2260:17101)
 export const HeartFillIcon = createIcon(HeartFillSvg, 24, 'HeartFillIcon'); // heart_fill (2260:17082)

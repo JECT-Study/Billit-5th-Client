@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { parseApiError } from '@/lib/apiError';
 import { Button } from '@/shared/ui/Button';
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
+import { Toast } from '@/shared/ui/Toast';
 
 import { SignupAgreementList } from '@/features/auth/components/SignupAgreementList';
 import { useCompleteRegistrationMutation } from '@/features/auth/hooks/useCompleteRegistrationMutation';
@@ -41,6 +42,7 @@ export function SignupScreen() {
   const [isRegistrationTokenValid, setIsRegistrationTokenValid] = useState<
     boolean | null
   >(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const isSubmittingRef = useRef(false);
   const requiredTerms =
     registrationQuery.data?.terms.filter((term) => term.isRequired) ?? [];
@@ -100,6 +102,14 @@ export function SignupScreen() {
     return () => subscription.remove();
   }, [handlePressBack]);
 
+  function showToast(message: string) {
+    setToastMessage(message);
+  }
+
+  function handleDismissToast() {
+    setToastMessage(null);
+  }
+
   function handleToggleAgeEligible() {
     setForm((current) => ({
       ...current,
@@ -120,13 +130,13 @@ export function SignupScreen() {
   async function handlePressTermsDetail(terms: RegistrationTerms) {
     // 약관 주소는 서버(contentUrl)가 준다. Notion 게시 주소가 등록되면 앱 수정 없이 열린다.
     if (!isTermsContentUrl(terms.contentUrl)) {
-      Alert.alert('약관 내용을 준비하고 있어요.');
+      showToast('약관 내용을 준비하고 있어요.');
       return;
     }
     try {
       await openTermsContent(terms.contentUrl);
     } catch {
-      Alert.alert('약관을 열지 못했어요.', '잠시 후 다시 시도해주세요.');
+      showToast('약관을 열지 못했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
@@ -163,7 +173,7 @@ export function SignupScreen() {
         if (!registrationQuery.isError) {
           return;
         }
-        Alert.alert('약관을 불러오지 못했어요. 다시 시도해주세요.');
+        showToast('약관을 불러오지 못했어요. 다시 시도해주세요.');
         const refreshed = await registrationQuery.refetch();
         if (parseApiError(refreshed.error)?.status === 401) {
           showExpiredAndLeave();
@@ -178,16 +188,14 @@ export function SignupScreen() {
       if (!parsed.success) {
         const field = parsed.error.issues[0]?.path[0];
         if (field === 'agreements') {
-          Alert.alert('필수 약관에 동의해주세요.');
+          showToast('필수 약관에 동의해주세요.');
           return;
         }
         if (field === 'isAgeEligible') {
-          Alert.alert('만 18세 이상인지 확인해주세요.');
+          showToast('만 18세 이상인지 확인해주세요.');
           return;
         }
-        Alert.alert(
-          parsed.error.issues[0]?.message ?? '입력값을 확인해주세요.',
-        );
+        showToast(parsed.error.issues[0]?.message ?? '입력값을 확인해주세요.');
         return;
       }
 
@@ -209,7 +217,7 @@ export function SignupScreen() {
         apiError?.status === 400 &&
         apiError.code === 'USER_REQUIRED_AGREEMENT_MISSING'
       ) {
-        Alert.alert(apiError.message ?? '필수 약관에 동의해주세요.');
+        showToast(apiError.message ?? '필수 약관에 동의해주세요.');
         return;
       }
       if (
@@ -229,22 +237,22 @@ export function SignupScreen() {
             ),
           }));
         }
-        Alert.alert('약관이 개정됐을 수 있어요. 다시 확인해주세요.');
+        showToast('약관이 개정됐을 수 있어요. 다시 확인해주세요.');
         return;
       }
       if (apiError?.status === null) {
-        Alert.alert(
-          '가입을 완료하지 못했어요',
-          '네트워크 연결을 확인한 뒤 다시 시도해주세요.',
+        showToast(
+          '가입을 완료하지 못했어요. 네트워크 연결을 확인한 뒤 다시 시도해주세요.',
         );
         return;
       }
-      Alert.alert(
-        '가입을 완료하지 못했어요',
-        apiError?.message ??
+      showToast(
+        `가입을 완료하지 못했어요. ${
+          apiError?.message ??
           (error instanceof Error
             ? error.message
-            : '잠시 후 다시 시도해주세요.'),
+            : '잠시 후 다시 시도해주세요.')
+        }`,
       );
     } finally {
       isSubmittingRef.current = false;
@@ -285,6 +293,9 @@ export function SignupScreen() {
           isDisabled={isRegistrationPending}
         />
       </View>
+      {toastMessage ? (
+        <Toast message={toastMessage} onDismiss={handleDismissToast} />
+      ) : null}
     </SafeAreaView>
   );
 }
