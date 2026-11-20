@@ -1,4 +1,5 @@
 import { DateTimePicker } from '@expo/ui/community/datetime-picker';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { Modal, Platform, Pressable, View } from 'react-native';
 
 import { COLORS } from '@/theme/theme.generated';
@@ -75,7 +76,7 @@ export function DatePicker({
           className="rounded-12 bg-surface-default absolute left-24 right-24 pb-16"
           style={{ top: anchorTop, boxShadow: POPOVER_SHADOW }}
         >
-          <DateTimePicker
+          <RNDateTimePicker
             value={toLocalDate(value)}
             mode="date"
             display="inline"

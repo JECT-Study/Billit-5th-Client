@@ -15,6 +15,7 @@ const nicknameMessage = '닉네임은 한글, 영문, 숫자로 1~10자 입력�
 const memberCapacityMessage =
   '총인원은 생성자를 포함해 1~10명으로 선택해주세요.';
 const dateMessage = '여행 기간을 선택해주세요.';
+const dateOrderMessage = '종료일은 시작일 이후로 선택해주세요.';
 
 const nameSchema = z
   .string()
@@ -59,7 +60,7 @@ const dateStepSchema = z
     endDate: z.iso.date({ error: dateMessage }),
   })
   .refine(({ startDate, endDate }) => endDate >= startDate, {
-    message: '종료일은 시작일 이후로 선택해주세요.',
+    message: dateOrderMessage,
     path: ['endDate'],
   });
 
@@ -113,6 +114,15 @@ export function getTripCreationTextFieldError(
   const result = (field === 'name' ? nameSchema : nicknameSchema).safeParse(
     value,
   );
+  return result.success ? undefined : result.error.issues[0]?.message;
+}
+
+export function getTripDateRangeError(
+  startDate: string,
+  endDate: string,
+): string | undefined {
+  if (!startDate || !endDate) return undefined;
+  const result = dateStepSchema.safeParse({ startDate, endDate });
   return result.success ? undefined : result.error.issues[0]?.message;
 }
 

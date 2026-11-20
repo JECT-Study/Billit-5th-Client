@@ -1,6 +1,7 @@
 import { INITIAL_TRIP_DRAFT, type TripCreationDraft } from './tripCreationForm';
 import {
   getTripCreationTextFieldError,
+  getTripDateRangeError,
   isTripStepInputEmpty,
   tripCreationSchema,
   validateTripCreationStep,
@@ -104,6 +105,10 @@ describe('tripCreationSchema', () => {
     );
     expect(getTripCreationTextFieldError('nickname', '')).toBeUndefined();
     expect(getTripCreationTextFieldError('name', '  ')).toBeUndefined();
+    expect(getTripDateRangeError('2026-11-19', '2026-11-18')).toBe(
+      '종료일은 시작일 이후로 선택해주세요.',
+    );
+    expect(getTripDateRangeError('2026-11-19', '2026-11-19')).toBeUndefined();
     expect(
       tripCreationSchema.safeParse({
         ...completeDraft,

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import { View } from 'react-native';
 
+import { getTripDateRangeError } from '@/features/trip/tripCreationSchema';
 import { DatePicker } from '@/shared/ui/DatePicker';
 import { DropdownDateRange } from '@/shared/ui/DropdownDateRange';
 import { Text } from '@/shared/ui/Text';
+import { COLORS } from '@/theme/theme.generated';
 
 type DateTarget = 'startDate' | 'endDate';
 
@@ -23,6 +25,7 @@ export function TripDateRangeField({
   const dateRangeRef = useRef<View>(null);
   const [pickerTarget, setPickerTarget] = useState<DateTarget | null>(null);
   const [anchorTop, setAnchorTop] = useState(0);
+  const errorMessage = getTripDateRangeError(startDate, endDate);
 
   function openDatePicker(target: DateTarget) {
     dateRangeRef.current?.measureInWindow((_x, y, _width, height) => {
@@ -59,6 +62,14 @@ export function TripDateRangeField({
           onPressEndDate={handlePressEndDate}
         />
       </View>
+      {errorMessage ? (
+        <Text
+          className="text-caption-2 font-semibold"
+          style={{ color: COLORS['red-alert-dark'] }}
+        >
+          {errorMessage}
+        </Text>
+      ) : null}
       {pickerTarget ? (
         <DatePicker
           value={pickerTarget === 'startDate' ? startDate : endDate}
