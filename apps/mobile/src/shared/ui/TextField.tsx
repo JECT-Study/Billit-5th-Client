@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
 import { Text } from '@/shared/ui/Text';
-import { COLORS } from '@/theme/theme.generated';
+import { COLORS, FONT_SIZE } from '@/theme/theme.generated';
 
 type TextFieldProps = {
   label: string;
@@ -72,8 +72,10 @@ export function TextField({
             autoCorrect={false}
             underlineColorAndroid="transparent"
             selectionColor={COLORS['sky-60']}
-            className="text-strong text-body-2 flex-1 font-medium"
+            className="text-strong flex-1 font-medium"
             style={{
+              fontSize: FONT_SIZE['body-2'][0],
+              letterSpacing: FONT_SIZE['body-2'][1].letterSpacing,
               height: 28,
               padding: 0,
               margin: 0,
