@@ -8,5 +8,6 @@ overrides:
   '@react-native/metro-config': 0.86.3
 
 allowBuilds:
+  msw: false
   sharp: true
   unrs-resolver: true

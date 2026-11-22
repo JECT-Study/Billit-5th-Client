@@ -17,8 +17,10 @@ import { execFileSync } from 'node:child_process';
 // 아이콘이 라이브러리 파일로 옮겨지면 여기만 바꾸면 됨
 const FILE_KEY = 'E1ACpAmbHMjk3CNT0uMczu'; // 3팀_내부공유용
 const ICON_SECTION_ID = '2260:17032'; //      comp > 01 · 아이콘 및 에셋 > icon
-// 섹션 밖에 있지만 화면에서 쓰는 아이콘 (예: 라이브러리 원격 컴포넌트를 쓰는 인스턴스)
-const EXTRA_NODE_IDS = [];
+// 섹션 밖에 있지만 화면에서 쓰는 아이콘/컴포넌트 세트
+const EXTRA_NODE_IDS = [
+  '3061:69024', // Option > Flag variants (KR, US, JP, EU, CN)
+];
 const OUTPUT = 'src/shared/ui/icons/icons.figma.json';
 const BATCH_SIZE = 50; // /v1/images 한 번에 요청할 노드 수
 
@@ -44,16 +46,26 @@ const figma = async (path) => {
   return res.json();
 };
 
-// 1. 아이콘 목록: 섹션 바로 아래 컴포넌트 + 추가 노드
+// 1. 아이콘 목록: 섹션 바로 아래 컴포넌트, 컴포넌트 세트의 variant + 추가 노드
 const { nodes } = await figma(
-  `/files/${FILE_KEY}/nodes?ids=${encodeURIComponent([ICON_SECTION_ID, ...EXTRA_NODE_IDS].join(','))}&depth=1`,
+  `/files/${FILE_KEY}/nodes?ids=${encodeURIComponent([ICON_SECTION_ID, ...EXTRA_NODE_IDS].join(','))}&depth=2`,
 );
 const section = nodes[ICON_SECTION_ID]?.document;
 if (!section) throw new Error(`아이콘 섹션을 찾을 수 없음: ${ICON_SECTION_ID}`);
 
+const iconComponentsFrom = (node) => {
+  if (node.type === 'COMPONENT') return [node];
+  // Flag처럼 variant를 COMPONENT_SET으로 묶은 아이콘도 동기화한다.
+  if (node.type === 'COMPONENT_SET')
+    return (node.children ?? []).filter((child) => child.type === 'COMPONENT');
+  return [];
+};
+
+const sectionIconComponents = section.children.flatMap(iconComponentsFrom);
+
 const targets = [
-  ...section.children.filter((n) => n.type === 'COMPONENT'),
-  ...EXTRA_NODE_IDS.map((id) => nodes[id]?.document).filter(Boolean),
+  ...sectionIconComponents,
+  ...EXTRA_NODE_IDS.flatMap((id) => iconComponentsFrom(nodes[id]?.document)),
 ].map((n) => ({ nodeId: n.id, figmaName: n.name }));
 console.log(`아이콘 ${targets.length}개 발견`);
 

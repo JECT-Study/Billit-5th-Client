@@ -44,25 +44,62 @@ const INK_COLORS = new Set(['#292C2D', '#616367', 'BLACK', '#000000']);
 // ─── 이름 규칙 ──────────────────────────────────────────────
 // "majesticons:receipt-text-line" → "receipt-text-line"   (아이콘 세트 접두어 제거)
 // "invite/icon_camera_fill 2"     → "camera-fill"          (경로·icon_ 접두어·번호 제거)
+// "Flag, KR"                      → "flag-kr"
+// "Property 1=Flag, Property 2=KR" → "flag-kr"              (Figma variant)
 // "caret_down_sm"                 → "caret-down-sm"
-const toCodeName = (figmaName) =>
-  figmaName
+const toCodeName = (figmaName) => {
+  const variantValues = [
+    ...figmaName.matchAll(/(?:^|,)\s*[^=,]+\s*=\s*([^,]+)/g),
+  ].map(([, value]) => value.trim());
+  const nameSource = variantValues.length ? variantValues.join('-') : figmaName;
+
+  return nameSource
     .replace(/^[\w-]+:/, '')
     .replace(/^.*\//, '')
     .replace(/^icon_/, '')
     .replace(/\s+\d+$/, '')
     .trim()
-    .replace(/[\s_]+/g, '-')
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
 
 // ─── SVG 정리 ───────────────────────────────────────────────
 const warnings = [];
+
+// 래스터 국기: objectBoundingBox 패턴(<pattern> + <use>)으로 채운 <rect>를 <image>로 바로 그린다.
+// 일본·유럽처럼 사각형이 아이콘 밖(x=-6)에서 시작하면 react-native-svg가 패턴 기준점을
+// 어긋나게 그려 국기 내용이 가운데에 오지 않는다.
+const inlinePatternImages = (svg, name) => {
+  const out = svg.replace(
+    /<rect([^>]*?) fill="url\(#(pattern[^)]+)\)"\/>/g,
+    (_, attrs, patternId) => {
+      const useId = svg.match(
+        new RegExp(`<pattern id="${patternId}"[\\s\\S]*?<use href="#([^"]+)"`),
+      )?.[1];
+      const href =
+        useId &&
+        svg.match(new RegExp(`<image id="${useId}"[^>]*? href="([^"]+)"`))?.[1];
+      const attr = (key) =>
+        attrs.match(new RegExp(`(?:^|\\s)${key}="([^"]+)"`))?.[1];
+      if (!href || !attr('width') || !attr('height'))
+        throw new Error(`${name}: 이미지 패턴(${patternId})을 풀 수 없음`);
+      return `<image x="${attr('x') ?? 0}" y="${attr('y') ?? 0}" width="${attr('width')}" height="${attr('height')}" preserveAspectRatio="none" href="${href}"/>`;
+    },
+  );
+  return out
+    .replace(/<pattern[\s\S]*?<\/pattern>/g, '')
+    .replace(/<image id="[^"]+"[^>]*\/>/g, '');
+};
+
 const cleanSvg = (svg, name) => {
   let s = svg.replace(/\s+xmlns(:xlink)?="[^"]*"/g, '');
+  const hasEmbeddedImage = /<image\b/.test(s);
 
   // Figma 바깥/안쪽 선: <use>로 같은 path를 칠하고, 선은 mask로 잘라 냄
   // 선 색과 칠 색이 같으면 mask 없이 그려도 모양이 같으므로 풀어서 일반 path로 바꿈
-  if (/<use /.test(s)) {
+  // 이미지 패턴의 <use>는 그대로 남긴다. (국기 같은 래스터 에셋)
+  if (/<use /.test(s) && !hasEmbeddedImage) {
     const defs = Object.fromEntries(
       [...s.matchAll(/<path id="([^"]+)"([^>]*?)\/>/g)].map(([, id, attrs]) => [
         id,
@@ -91,14 +128,26 @@ const cleanSvg = (svg, name) => {
     /<mask id="([^"]+)"[^>]*x="0" y="0" width="(\d+)" height="\2"[^>]*><rect width="\2" height="\2" fill="[^"]+"\/><\/mask><g mask="url\(#\1\)">([\s\S]*?)<\/g>/g,
     '$3',
   );
-  s = s.replace(/<g clip-path="url\(#[^)]+\)">([\s\S]*?)<\/g>/g, '$1');
-  s = s.replace(/<defs>[\s\S]*?<\/defs>/g, '');
+  // 래스터 SVG의 원형 국기 모양은 clipPath·pattern·image를 함께 써야 한다.
+  if (!hasEmbeddedImage) {
+    s = s.replace(/<g clip-path="url\(#[^)]+\)">([\s\S]*?)<\/g>/g, '$1');
+    s = s.replace(/<defs>[\s\S]*?<\/defs>/g, '');
+  }
   // 아이콘 영역 전체를 덮는 흰 배경 제거
   s = s.replace(/<rect width="(\d+)" height="\1" fill="white"\/>/g, '');
-  if (/clip-path=|<defs>|<mask|Gradient|<image|<text/.test(s))
+  if (
+    !hasEmbeddedImage &&
+    /clip-path=|<defs>|<mask|Gradient|<image|<text/.test(s)
+  )
     throw new Error(
       `${name}: 지원하지 않는 SVG 요소 (clip/mask/gradient/image/text)`,
     );
+
+  s = s.replace(/xlink:href=/g, 'href=');
+
+  // 이미지가 포함된 SVG는 배경색도 에셋의 일부이므로 원본 색을 보존한다.
+  if (hasEmbeddedImage)
+    return inlinePatternImages(s, name).replace(/></g, '>\n<').trim() + '\n';
 
   // 한 가지 색으로만 그린 아이콘은 그 색이 무엇이든 currentColor로 (색은 쓰는 곳에서 color로 지정)
   const colorRe = /(fill|stroke)="(#[0-9A-Fa-f]{3,8}|white|black)"/g;
@@ -128,6 +177,11 @@ const ALLOWED_TAGS = new Set([
   'line',
   'polyline',
   'polygon',
+  'defs',
+  'clipPath',
+  'pattern',
+  'use',
+  'image',
 ]);
 
 // ─── 실행 ───────────────────────────────────────────────────
