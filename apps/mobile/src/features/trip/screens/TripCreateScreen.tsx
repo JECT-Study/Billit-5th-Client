@@ -1,7 +1,13 @@
 import * as Crypto from 'expo-crypto';
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import {
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TripCountrySelect } from '@/features/trip/components/TripCountrySelect';
@@ -66,14 +72,29 @@ export function TripCreateScreen() {
     setDraft((current) => ({ ...current, ...patch }));
   }
 
-  function handlePressBack() {
+  const handlePressBack = useCallback(() => {
+    if (isSubmittingRef.current || createTripMutation.isPending) return;
     if (step === 0) {
       router.back();
       return;
     }
     setIsRequiredErrorShown(false);
     setStep((current) => (current - 1) as TripCreationStep);
-  }
+  }, [step, createTripMutation.isPending]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS !== 'android') return;
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          handlePressBack();
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [handlePressBack]),
+  );
 
   async function handlePressNext() {
     if (isSubmittingRef.current) return;
