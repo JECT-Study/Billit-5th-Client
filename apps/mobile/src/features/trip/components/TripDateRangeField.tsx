@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { getTripDateRangeError } from '@/features/trip/tripCreationSchema';
 import { DatePicker } from '@/shared/ui/DatePicker';
@@ -17,6 +17,14 @@ type TripDateRangeFieldProps = {
 
 const DATE_PICKER_GAP = 6;
 
+function getTodayDateString() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function TripDateRangeField({
   startDate,
   endDate,
@@ -28,6 +36,14 @@ export function TripDateRangeField({
   const errorMessage = getTripDateRangeError(startDate, endDate);
 
   function openDatePicker(target: DateTarget) {
+    const currentDate = target === 'startDate' ? startDate : endDate;
+    if (Platform.OS === 'ios' && !currentDate) {
+      const today = getTodayDateString();
+      const initialDate =
+        target === 'endDate' && startDate > today ? startDate : today;
+      onSelectDate(target, initialDate);
+    }
+
     dateRangeRef.current?.measureInWindow((_x, y, _width, height) => {
       setAnchorTop(y + height + DATE_PICKER_GAP);
       setPickerTarget(target);
@@ -73,6 +89,7 @@ export function TripDateRangeField({
       {pickerTarget ? (
         <DatePicker
           value={pickerTarget === 'startDate' ? startDate : endDate}
+          minimumDate={pickerTarget === 'endDate' ? startDate : undefined}
           anchorTop={anchorTop}
           onSelect={handleSelectDate}
           onClose={handleClose}

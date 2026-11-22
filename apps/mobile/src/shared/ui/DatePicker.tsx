@@ -6,6 +6,7 @@ import { COLORS } from '@/theme/theme.generated';
 
 type DatePickerProps = {
   value: string;
+  minimumDate?: string;
   // iOS 팝오버가 시작할 화면 위쪽 좌표(날짜 입력칸 바로 아래). Android 다이얼로그에서는 쓰지 않는다.
   anchorTop: number;
   onSelect: (date: string) => void;
@@ -33,6 +34,7 @@ function toDateString(date: Date) {
 // - Android: 시스템 달력 다이얼로그
 export function DatePicker({
   value,
+  minimumDate,
   anchorTop,
   onSelect,
   onClose,
@@ -49,6 +51,7 @@ export function DatePicker({
     return (
       <DateTimePicker
         value={toLocalDate(value)}
+        minimumDate={minimumDate ? toLocalDate(minimumDate) : undefined}
         mode="date"
         presentation="dialog"
         accentColor={COLORS['sky-60']}
@@ -73,16 +76,16 @@ export function DatePicker({
           className="absolute inset-0"
         />
         <View
-          className="rounded-12 bg-surface-default absolute left-24 right-24 pb-16"
+          className="rounded-12 bg-surface-default absolute left-24 right-24 items-center pb-16"
           style={{ top: anchorTop, boxShadow: POPOVER_SHADOW }}
         >
           <RNDateTimePicker
             value={toLocalDate(value)}
+            minimumDate={minimumDate ? toLocalDate(minimumDate) : undefined}
             mode="date"
             display="inline"
             locale="ko_KR"
             onValueChange={handleNativeDateChange}
-            style={{ width: '100%' }}
           />
         </View>
       </View>
