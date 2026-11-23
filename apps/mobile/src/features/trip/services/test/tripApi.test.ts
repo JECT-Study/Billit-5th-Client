@@ -26,7 +26,7 @@ const request: CreateTripRequest = {
   startDate: '2026-12-01',
   endDate: '2026-12-05',
   memberCapacity: 3,
-  nickname: '민서',
+  tripNickname: '민서',
 };
 
 const trip = {

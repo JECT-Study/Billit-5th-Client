@@ -24,7 +24,7 @@ describe('toCreateTripRequest', () => {
       startDate: '2026-12-01',
       endDate: '2026-12-05',
       memberCapacity: 3,
-      nickname: '민서',
+      tripNickname: '민서',
     });
   });
 
@@ -49,7 +49,7 @@ describe('getTripCreationAttempt', () => {
     const first = getTripCreationAttempt(request, null, createKey);
     const retry = getTripCreationAttempt({ ...request }, first, createKey);
     const changed = getTripCreationAttempt(
-      { ...request, nickname: '새닉네임' },
+      { ...request, tripNickname: '새닉네임' },
       retry,
       createKey,
     );

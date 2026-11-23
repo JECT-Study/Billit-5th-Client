@@ -10,7 +10,7 @@ type CreateTripRequestBase = {
   startDate: string;
   endDate: string;
   memberCapacity: number;
-  nickname: string;
+  tripNickname: string;
 };
 
 export type CreateTripRequest = CreateTripRequestBase &
@@ -31,7 +31,7 @@ export function toCreateTripRequest(
     startDate: values.startDate,
     endDate: values.endDate,
     memberCapacity: values.memberCapacity,
-    nickname: values.nickname,
+    tripNickname: values.nickname,
   };
 
   if (values.countryCode === 'ETC') {
