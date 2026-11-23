@@ -16,10 +16,19 @@ type DialogProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  // 토스트처럼 카드 밖, 화면 전체 위에 겹쳐 보여줄 요소. Modal은 화면 위에 따로 그려지므로
+  // 팝업이 열려 있는 동안 보여줄 토스트는 여기로 넘겨야 팝업 위에 보인다.
+  overlay?: ReactNode;
 };
 
 // 입력이 있는 팝업이 실수로 닫히지 않게 배경을 눌러도 닫지 않고, 닫기 버튼과 안드로이드 뒤로가기로만 닫는다.
-export function Dialog({ visible, title, onClose, children }: DialogProps) {
+export function Dialog({
+  visible,
+  title,
+  onClose,
+  children,
+  overlay,
+}: DialogProps) {
   function handleClose() {
     onClose();
   }
@@ -53,6 +62,7 @@ export function Dialog({ visible, title, onClose, children }: DialogProps) {
           {children}
         </View>
       </KeyboardAvoidingView>
+      {overlay}
     </Modal>
   );
 }

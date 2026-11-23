@@ -18,6 +18,7 @@ import { Button } from '@/shared/ui/Button';
 import { Dialog } from '@/shared/ui/Dialog';
 import { SearchIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
+import { Toast } from '@/shared/ui/Toast';
 import { COLORS, FONT_SIZE, TEXT_COLORS } from '@/theme/theme.generated';
 
 // TODO: Figma의 error_bg가 토큰 내보내기 대상이 아닌 "변수 컬렉션"에 있어 tokens.json에 없다.
@@ -25,6 +26,7 @@ import { COLORS, FONT_SIZE, TEXT_COLORS } from '@/theme/theme.generated';
 const UNAVAILABLE_CARD_BACKGROUND = '#FFE7E8';
 const NOT_FOUND_MESSAGE = '검색 결과가 없어요.';
 const SEARCH_FAILED_MESSAGE = '검색하지 못했어요. 다시 시도해주세요.';
+const ALREADY_JOINED_MESSAGE = '이미 참여중인 여행방입니다.';
 
 // input: 코드 입력 (2260:19074) → result: 검색 결과 (2260:19158 참여 가능, 2260:19250 참여불가)
 type DialogStep = 'input' | 'result';
@@ -40,6 +42,8 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
   const [input, setInput] = useState('');
   // 형식이 틀린 코드는 서버에 보내지 않고 바로 결과 없음으로 보여준다.
   const [isFormatInvalid, setIsFormatInvalid] = useState(false);
+  const [isAlreadyJoinedToastShown, setIsAlreadyJoinedToastShown] =
+    useState(false);
 
   const result = searchMutation.data;
   const status = result ? getInviteCodeSearchStatus(result) : null;
@@ -51,8 +55,14 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
       ? SEARCH_FAILED_MESSAGE
       : null;
   const isInputEmpty = input.trim() === '';
+  const isAlreadyJoined = status === 'ALREADY_JOINED';
+  // 이미 참여한 여행은 비활성 모습으로 보여주되, 눌렀을 때 이유를 토스트로 알려야 해서
+  // 실제로 비활성화하지 않고 비활성과 같은 모습인 secondary로 그린다.
   const isJoinDisabled =
-    status !== 'JOINABLE' || isInputEmpty || searchMutation.isPending;
+    status === 'UNAVAILABLE' ||
+    status === null ||
+    isInputEmpty ||
+    searchMutation.isPending;
 
   function handleChangeText(text: string) {
     setInput(text);
@@ -71,16 +81,7 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
       return;
     }
     searchMutation.mutate(code, {
-      onSuccess: (searched) => {
-        if (getInviteCodeSearchStatus(searched) === 'ALREADY_JOINED') {
-          // 여행 목록 위에서 열린 팝업이라 닫기만 하면 목록이 보인다.
-          // TODO: 여행방 상세 화면이 생기면 해당 여행방으로 이동
-          onClose();
-          return;
-        }
-        setStep('result');
-      },
-      onError: () => {
+      onSettled: () => {
         setStep('result');
       },
     });
@@ -91,11 +92,19 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
   }
 
   function handleJoin() {
+    if (isAlreadyJoined) {
+      setIsAlreadyJoinedToastShown(true);
+      return;
+    }
     // 입력창의 현재 값이 아니라 검색에 쓴 코드를 넘긴다.
     const inviteCode = searchMutation.variables;
     if (!inviteCode) return;
     onClose();
     router.push({ pathname: '/trips/join', params: { inviteCode } });
+  }
+
+  function handleDismissToast() {
+    setIsAlreadyJoinedToastShown(false);
   }
 
   if (step === 'input') {
@@ -124,7 +133,19 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
   }
 
   return (
-    <Dialog visible title="검색 결과" onClose={handleClose}>
+    <Dialog
+      visible
+      title="검색 결과"
+      onClose={handleClose}
+      overlay={
+        isAlreadyJoinedToastShown ? (
+          <Toast
+            message={ALREADY_JOINED_MESSAGE}
+            onDismiss={handleDismissToast}
+          />
+        ) : null
+      }
+    >
       <View className="mt-24">
         <InviteCodeInput
           value={input}
@@ -135,10 +156,11 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
       </View>
       {/* 시안의 팝업 높이(423)를 유지하도록 결과 영역 높이를 고정한다. */}
       <View className="pt-18 h-[204px]">
-        {result && status !== 'ALREADY_JOINED' ? (
+        {result ? (
+          // 이미 참여한 여행도 참여 가능한 여행과 같은 카드로 보여준다.
           <InviteCodeResultCard
             result={result}
-            isJoinable={status === 'JOINABLE'}
+            isJoinable={status !== 'UNAVAILABLE'}
           />
         ) : searchMessage ? (
           // 결과 카드 대신 빈 결과 영역의 가운데에 조금 크게 보여준다.
@@ -151,7 +173,7 @@ export function InviteCodeDialog({ onClose }: InviteCodeDialogProps) {
       </View>
       <Button
         label="이 여행 참여하기"
-        variant="black"
+        variant={isAlreadyJoined ? 'secondary' : 'black'}
         onPress={handleJoin}
         isDisabled={isJoinDisabled}
       />
