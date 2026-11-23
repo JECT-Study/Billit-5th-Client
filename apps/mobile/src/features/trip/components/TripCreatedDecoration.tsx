@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CreatedGlowSvg from '@/assets/images/trip/created-glow.svg';
-import CreatedRaysSvg from '@/assets/images/trip/created-rays.svg';
+import { TripCreatedRays } from '@/features/trip/components/TripCreatedRays';
 
 // Figma 2260:19811 기준 위치. 세로는 상태바 아래부터, 가로는 화면 가운데부터 잰다.
 // SVG는 블러가 퍼질 여백까지 포함한 크기라 노드 좌표보다 조금 바깥에서 시작한다.
@@ -37,7 +37,7 @@ export function TripCreatedDecoration() {
           },
         ]}
       >
-        <CreatedRaysSvg />
+        <TripCreatedRays />
       </View>
     </View>
   );
