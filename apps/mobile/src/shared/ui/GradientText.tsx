@@ -49,8 +49,8 @@ export function GradientText({
     setLines(event.nativeEvent.lines);
   }
 
-  const width = Math.max(0, ...lines.map((line) => line.x + line.width));
-  const height = Math.max(0, ...lines.map((line) => line.y + line.height));
+  // 그라데이션은 RN이 잰 글자 너비에 맞춰 칠한다.
+  const textWidth = Math.max(0, ...lines.map((line) => line.x + line.width));
 
   return (
     <View>
@@ -63,9 +63,11 @@ export function GradientText({
         {text}
       </Text>
       {lines.length > 0 ? (
+        // SVG 글자는 RN이 잰 너비보다 조금 넓게 그려질 수 있어,
+        // 글자 너비가 아니라 부모 폭 전체를 영역으로 잡아 끝 글자가 잘리지 않게 한다.
         <Svg
-          width={width}
-          height={height}
+          width="100%"
+          height="100%"
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
           accessibilityElementsHidden
@@ -76,7 +78,7 @@ export function GradientText({
               id={gradientId}
               x1="0"
               y1="0"
-              x2={width}
+              x2={textWidth}
               y2="0"
               gradientUnits="userSpaceOnUse"
             >
