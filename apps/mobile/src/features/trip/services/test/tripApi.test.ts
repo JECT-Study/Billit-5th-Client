@@ -310,9 +310,12 @@ describe('trip invitation api', () => {
       );
 
       await expect(
-        joinTripByInviteCode({ inviteCode: 'A7K2PQ', nickname: '지훈' }),
+        joinTripByInviteCode({ inviteCode: 'A7K2PQ', tripNickname: '지훈' }),
       ).resolves.toEqual(membership);
-      expect(receivedBody).toEqual({ inviteCode: 'A7K2PQ', nickname: '지훈' });
+      expect(receivedBody).toEqual({
+        inviteCode: 'A7K2PQ',
+        tripNickname: '지훈',
+      });
     });
 
     it('이미 참여 중이면 200으로 받은 기존 참여 정보를 반환한다', async () => {
@@ -323,7 +326,7 @@ describe('trip invitation api', () => {
       );
 
       await expect(
-        joinTripByInviteCode({ inviteCode: 'A7K2PQ', nickname: '지훈' }),
+        joinTripByInviteCode({ inviteCode: 'A7K2PQ', tripNickname: '지훈' }),
       ).resolves.toEqual(membership);
     });
 
@@ -335,7 +338,7 @@ describe('trip invitation api', () => {
       );
 
       await expectApiError(
-        joinTripByInviteCode({ inviteCode: 'ZZZZZZ', nickname: '지훈' }),
+        joinTripByInviteCode({ inviteCode: 'ZZZZZZ', tripNickname: '지훈' }),
         { status: 404, code: 'TRIP_INVITATION_NOT_FOUND' },
       );
     });
@@ -348,7 +351,7 @@ describe('trip invitation api', () => {
       server.use(http.post(membershipUrl, () => errorResponse(409, code)));
 
       await expectApiError(
-        joinTripByInviteCode({ inviteCode: 'A7K2PQ', nickname: '지훈' }),
+        joinTripByInviteCode({ inviteCode: 'A7K2PQ', tripNickname: '지훈' }),
         { status: 409, code },
       );
     });

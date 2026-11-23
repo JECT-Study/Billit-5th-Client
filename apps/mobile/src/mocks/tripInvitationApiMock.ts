@@ -19,7 +19,7 @@ type MockInvitationTrip = TripInvitationSearch & {
   nicknames: string[];
 };
 
-type JoinRequest = { inviteCode: string; nickname: string };
+type JoinRequest = { inviteCode: string; tripNickname: string };
 
 function formatIsoDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -244,7 +244,8 @@ const tripInvitationMockAdapter: AxiosAdapter = async (config) => {
 
   // POST /api/v1/trip-memberships
   const request = toJoinRequest(config.data);
-  if (request.nickname === JOIN_FAILURE_NICKNAME) throw toNetworkError(config);
+  if (request.tripNickname === JOIN_FAILURE_NICKNAME)
+    throw toNetworkError(config);
   const trip = findTripByCode(request.inviteCode);
 
   if (!trip) {
@@ -281,7 +282,7 @@ const tripInvitationMockAdapter: AxiosAdapter = async (config) => {
       '참여할 수 있는 자리가 없습니다.',
     );
   }
-  if (trip.nicknames.includes(request.nickname)) {
+  if (trip.nicknames.includes(request.tripNickname)) {
     throw toApiError(
       config,
       409,
@@ -293,7 +294,7 @@ const tripInvitationMockAdapter: AxiosAdapter = async (config) => {
   const tripMemberId = `trip-member-${nextTripMemberNumber}`;
   nextTripMemberNumber += 1;
   tripMemberIdsByTripId.set(trip.tripId, tripMemberId);
-  trip.nicknames.push(request.nickname);
+  trip.nicknames.push(request.tripNickname);
   trip.registeredMemberCount += 1;
   trip.isAlreadyJoined = true;
 

@@ -66,7 +66,10 @@ export function TripJoinScreen() {
     }
 
     try {
-      await joinTripMutation.mutateAsync({ inviteCode, nickname });
+      await joinTripMutation.mutateAsync({
+        inviteCode,
+        tripNickname: nickname,
+      });
       goToTrips();
     } catch (error) {
       const result = getTripJoinErrorResult(error);

@@ -32,7 +32,7 @@ type ListTripsParams = {
 
 type JoinTripByInviteCodeVariables = {
   inviteCode: string;
-  nickname: string;
+  tripNickname: string;
 };
 
 const tripPath = '/api/v1/trips';
@@ -86,11 +86,11 @@ export async function searchTripInvitation(
 // 이미 참여 중이면 서버가 기존 참여 정보를 200으로 돌려주므로 멱등성 키를 보내지 않는다.
 export async function joinTripByInviteCode({
   inviteCode,
-  nickname,
+  tripNickname,
 }: JoinTripByInviteCodeVariables): Promise<TripMembership> {
   const response = await apiClient.post<{ data: unknown }>(tripMembershipPath, {
     inviteCode,
-    nickname,
+    tripNickname,
   });
   return tripMembershipSchema.parse(response.data.data);
 }
