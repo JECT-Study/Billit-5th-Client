@@ -4,7 +4,7 @@ import '@/shared/ui/cssInterop';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { router, Stack, usePathname, useSegments } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { apiClient } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
@@ -19,6 +19,9 @@ attachTokenRefresh(apiClient);
 export const unstable_settings = {
   initialRouteName: '(auth)',
 };
+
+const isMockApiEnabled =
+  __DEV__ && process.env.EXPO_PUBLIC_USE_MOCK_API === 'true';
 
 export default function RootLayout() {
   const [isFontsLoaded, fontLoadError] = useFonts({
@@ -36,6 +39,7 @@ export default function RootLayout() {
   const pathname = usePathname();
   const segments = useSegments();
   const hasEnteredTabs = useRef(false);
+  const [isMockingReady, setMockingReady] = useState(!isMockApiEnabled);
   const isInTabs = segments[0] === '(tabs)';
   const isAuthPath =
     pathname === '/' ||
@@ -63,7 +67,18 @@ export default function RootLayout() {
     }
   }, [isAuthPath, isInTabs]);
 
-  if (!isFontsLoaded && !fontLoadError) {
+  useEffect(() => {
+    if (!isMockApiEnabled) return;
+
+    void import('@/mocks')
+      .then(({ enableMocking }) => enableMocking())
+      .catch((error: unknown) => {
+        console.warn('개발용 API 목을 시작하지 못했습니다.', error);
+      })
+      .finally(() => setMockingReady(true));
+  }, []);
+
+  if ((!isFontsLoaded && !fontLoadError) || !isMockingReady) {
     return null;
   }
 
