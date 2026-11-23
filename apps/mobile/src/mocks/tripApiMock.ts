@@ -103,6 +103,16 @@ const mockTrips: TripListItem[] = [
   })),
 ];
 
+/** 다른 목(초대 참여 등)에서 만든 여행을 목록 맨 앞에 추가한다. */
+export function addMockTrip(trip: TripListItem) {
+  mockTrips.unshift(trip);
+}
+
+/** 다른 목(초대 정보 등)에서 여행 정보를 찾는다. */
+export function findMockTrip(tripId: string) {
+  return mockTrips.find((trip) => trip.tripId === tripId);
+}
+
 const createdTripsByIdempotencyKey = new Map<string, TripSummary>();
 let nextCreatedTripNumber = 1;
 

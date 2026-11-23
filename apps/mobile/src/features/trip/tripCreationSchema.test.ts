@@ -59,7 +59,7 @@ describe('validateTripCreationStep', () => {
     ).toContain('총인원');
     expect(
       validateTripCreationStep({ ...completeDraft, nickname: '민 지@' }, 5),
-    ).toContain('닉네임');
+    ).toBe('공백 또는 특수문자는 포함할 수 없어요.');
   });
 });
 
@@ -100,9 +100,13 @@ describe('tripCreationSchema', () => {
 
   it('필드 오류 메시지와 날짜 순서를 확인한다', () => {
     expect(getTripCreationTextFieldError('name', '서울@')).toContain('여행명');
-    expect(getTripCreationTextFieldError('nickname', '민 지')).toContain(
-      '닉네임',
+    expect(getTripCreationTextFieldError('nickname', '민 지')).toBe(
+      '공백 또는 특수문자는 포함할 수 없어요.',
     );
+    expect(getTripCreationTextFieldError('nickname', '민지@')).toBe(
+      '공백 또는 특수문자는 포함할 수 없어요.',
+    );
+    expect(getTripCreationTextFieldError('nickname', 'Jiho12')).toBeUndefined();
     expect(getTripCreationTextFieldError('nickname', '')).toBeUndefined();
     expect(getTripCreationTextFieldError('name', '  ')).toBeUndefined();
     expect(getTripDateRangeError('2026-11-19', '2026-11-18')).toBe(

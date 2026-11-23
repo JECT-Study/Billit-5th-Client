@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { InviteCodeDialog } from '@/features/trip/components/InviteCodeDialog';
 import { TripCardStack } from '@/features/trip/components/TripCardStack';
 import { TripKebabMenu } from '@/features/trip/components/TripKebabMenu';
 import { TripEmptyState } from '@/features/trip/components/TripEmptyState';
 import { TripFilterTabs } from '@/features/trip/components/TripFilterTabs';
 import { TripHomeHeader } from '@/features/trip/components/TripHomeHeader';
 import { TripListItem } from '@/features/trip/components/TripListItem';
+import { useInviteCodeDialogOnSignup } from '@/features/trip/hooks/useInviteCodeDialogOnSignup';
 import { useTripListQuery } from '@/features/trip/hooks/useTripListQuery';
 import {
   getTodayIsoDate,
@@ -31,6 +33,7 @@ import { COLORS } from '@/theme/theme.generated';
 export function TripScreen() {
   const [filter, setFilter] = useState<TripListFilter | undefined>(undefined);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const inviteCodeDialogState = useInviteCodeDialogOnSignup();
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
   const tripListQuery = useTripListQuery(filter);
   const allTripListQuery = useTripListQuery();
@@ -64,8 +67,16 @@ export function TripScreen() {
 
   function handlePressJoinWithInviteCode() {
     setIsMenuOpen(false);
-    // TODO: 초대코드 입력 모달 열기
+    inviteCodeDialogState.open();
   }
+
+  function handleCloseInviteCodeDialog() {
+    inviteCodeDialogState.close();
+  }
+
+  const inviteCodeDialog = inviteCodeDialogState.isOpen ? (
+    <InviteCodeDialog onClose={handleCloseInviteCodeDialog} />
+  ) : null;
 
   function handlePressTrip() {
     // TODO: 여행방 상세 화면이 생기면 이동
@@ -116,6 +127,7 @@ export function TripScreen() {
           onPressCreateTrip={handlePressCreateTrip}
           onPressJoinWithInviteCode={handlePressJoinWithInviteCode}
         />
+        {inviteCodeDialog}
       </SafeAreaView>
     );
   }
@@ -217,6 +229,7 @@ export function TripScreen() {
           <MoreIcon color={COLORS.white} />
         </Pressable>
       </View>
+      {inviteCodeDialog}
     </SafeAreaView>
   );
 }

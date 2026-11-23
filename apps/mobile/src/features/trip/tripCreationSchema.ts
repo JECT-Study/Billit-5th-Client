@@ -11,7 +11,7 @@ import type {
 
 const nameMessage = '여행명은 한글, 영문, 숫자와 공백으로 1~15자 입력해주세요.';
 const countryNameMessage = '국가명은 한글 또는 영문으로 1~10자 입력해주세요.';
-const nicknameMessage = '닉네임은 한글, 영문, 숫자로 1~10자 입력해주세요.';
+const nicknameMessage = '공백 또는 특수문자는 포함할 수 없어요.';
 const memberCapacityMessage =
   '총인원은 생성자를 포함해 1~10명으로 선택해주세요.';
 const dateMessage = '여행 기간을 선택해주세요.';
@@ -30,7 +30,8 @@ const customCountryNameSchema = z
   .trim()
   .regex(/^[가-힣A-Za-z]{1,10}$/, countryNameMessage);
 
-const nicknameSchema = z
+// 여행 생성과 초대 코드 참여에서 같은 여행방 닉네임 규칙을 쓴다.
+export const nicknameSchema = z
   .string()
   .regex(/^[가-힣A-Za-z0-9]{1,10}$/, nicknameMessage);
 
