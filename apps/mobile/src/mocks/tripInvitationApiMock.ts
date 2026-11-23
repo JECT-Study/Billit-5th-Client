@@ -188,6 +188,12 @@ function getInviteCode(tripId: string) {
   return code;
 }
 
+// 초대 링크가 가리킬 웹 랜딩 페이지 주소. 기본값은 apps/web의 pnpm dev 주소.
+// Android 에뮬레이터에서는 Mac의 localhost가 10.0.2.2이므로 .env.local에서 바꿔 쓴다.
+const webBaseUrl = (
+  process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:3000'
+).replace(/\/$/, '');
+
 const invitationPathPattern = /^\/api\/v1\/trips\/([^/]+)\/invitation$/;
 const searchPath = '/api/v1/trip-invitations';
 const membershipPath = '/api/v1/trip-memberships';
@@ -206,7 +212,7 @@ const tripInvitationMockAdapter: AxiosAdapter = async (config) => {
     const inviteCode = getInviteCode(tripId);
     const invitation: TripInvitation = {
       inviteCode,
-      inviteUrl: `https://example.com/invitations/${inviteCode}`,
+      inviteUrl: `${webBaseUrl}/invitations/${inviteCode}`,
     };
     return toResponse(config, { data: invitation });
   }
