@@ -1,7 +1,8 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, Stack, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  BackHandler,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -135,6 +136,17 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
     !isBusy;
   const nameErrorMessage = getTripCreationTextFieldError('name', draft.name);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS !== 'android') return;
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => isBusy,
+      );
+      return () => subscription.remove();
+    }, [isBusy]),
+  );
+
   function updateDraft(patch: Partial<TripUpdateDraft>) {
     setDraft((current) => ({ ...current, ...patch }));
   }
@@ -210,8 +222,12 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
 
   function handleDismissNotice() {
     const exitTo = notice?.exitTo ?? null;
+    // 떠날 때는 notice를 남겨 이동하는 동안 버튼이 다시 켜지지 않게 한다.
+    if (exitTo) {
+      leaveTripSettings(exitTo);
+      return;
+    }
     setNotice(null);
-    leaveTripSettings(exitTo);
   }
 
   return (
@@ -219,6 +235,7 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
       edges={['top', 'left', 'right', 'bottom']}
       className="bg-surface-default flex-1"
     >
+      <Stack.Screen options={{ gestureEnabled: !isBusy }} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
