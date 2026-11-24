@@ -13,6 +13,8 @@ const ADMIN_ONLY_MESSAGE = '여행 관리자만 여행방을 설정할 수 있�
 const LOAD_FAILED_MESSAGE = '여행 정보를 불러오지 못했어요. 다시 시도해주세요.';
 const SAVE_FAILED_MESSAGE = '여행 정보를 저장하지 못했어요. 다시 시도해주세요.';
 const CAPACITY_LOCKED_MESSAGE = '지금은 여행 총인원을 바꿀 수 없어요.';
+const RECORDS_EXIST_MESSAGE = '지출 또는 정산 기록이 있어 삭제할 수 없어요.';
+const DELETE_FAILED_MESSAGE = '여행을 삭제하지 못했어요. 다시 시도해주세요.';
 
 export const ADMIN_ONLY_NOTICE: TripSettingsNotice = {
   message: ADMIN_ONLY_MESSAGE,
@@ -48,4 +50,15 @@ export function getTripUpdateErrorNotice(error: unknown): TripSettingsNotice {
     };
   }
   return { message: apiError?.message ?? SAVE_FAILED_MESSAGE, exitTo: null };
+}
+
+// 여행 삭제(DELETE) 실패. 404는 삭제 성공으로 처리하므로 여기로 오지 않는다.
+export function getTripDeleteErrorNotice(error: unknown): TripSettingsNotice {
+  const apiError = parseApiError(error);
+
+  if (apiError?.status === 403) return ADMIN_ONLY_NOTICE;
+  if (apiError?.code === 'TRIP_RECORDS_EXIST') {
+    return { message: apiError.message ?? RECORDS_EXIST_MESSAGE, exitTo: null };
+  }
+  return { message: apiError?.message ?? DELETE_FAILED_MESSAGE, exitTo: null };
 }

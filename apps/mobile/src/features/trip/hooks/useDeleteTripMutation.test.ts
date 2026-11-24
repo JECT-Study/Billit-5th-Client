@@ -57,7 +57,7 @@ describe('useDeleteTripMutation', () => {
     } as never);
   });
 
-  it('성공하면 상세 캐시를 지우고 목록을 무효화한다', async () => {
+  it('성공하면 목록을 무효화하고, 화면이 닫히기 전 재조회를 막으려 상세 캐시는 둔다', async () => {
     useDeleteTripMutation();
 
     const options = jest.mocked(useMutation).mock.calls[0]?.[0];
@@ -73,9 +73,7 @@ describe('useDeleteTripMutation', () => {
 
     await onSuccess(undefined, 'trip-1');
 
-    expect(removeQueries).toHaveBeenCalledWith({
-      queryKey: tripKeys.detail('trip-1'),
-    });
+    expect(removeQueries).not.toHaveBeenCalled();
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: tripKeys.lists(),
     });

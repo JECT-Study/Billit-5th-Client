@@ -1,6 +1,7 @@
 import { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import {
+  getTripDeleteErrorNotice,
   getTripLoadErrorNotice,
   getTripUpdateErrorNotice,
 } from '@/features/trip/tripSettings';
@@ -83,6 +84,36 @@ describe('getTripUpdateErrorNotice', () => {
     ).toEqual({ message: '여행명 형식이 올바르지 않습니다.', exitTo: null });
     expect(getTripUpdateErrorNotice(networkError)).toEqual({
       message: '여행 정보를 저장하지 못했어요. 다시 시도해주세요.',
+      exitTo: null,
+    });
+  });
+});
+
+describe('getTripDeleteErrorNotice', () => {
+  it('관리자가 아니면 안내 후 뒤로 간다', () => {
+    expect(getTripDeleteErrorNotice(apiError(403))).toEqual({
+      message: '여행 관리자만 여행방을 설정할 수 있어요.',
+      exitTo: 'back',
+    });
+  });
+
+  it('기록이 있으면 화면에 남아 서버 메시지를 먼저 보여준다', () => {
+    expect(
+      getTripDeleteErrorNotice(
+        apiError(409, { code: 'TRIP_RECORDS_EXIST', message: '서버 문구' }),
+      ),
+    ).toEqual({ message: '서버 문구', exitTo: null });
+    expect(
+      getTripDeleteErrorNotice(apiError(409, { code: 'TRIP_RECORDS_EXIST' })),
+    ).toEqual({
+      message: '지출 또는 정산 기록이 있어 삭제할 수 없어요.',
+      exitTo: null,
+    });
+  });
+
+  it('그 밖의 실패는 화면에 남아 다시 시도할 수 있다', () => {
+    expect(getTripDeleteErrorNotice(networkError)).toEqual({
+      message: '여행을 삭제하지 못했어요. 다시 시도해주세요.',
       exitTo: null,
     });
   });

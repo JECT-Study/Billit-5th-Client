@@ -13,6 +13,7 @@ import { TripCountrySelect } from '@/features/trip/components/TripCountrySelect'
 import { TripCurrencyField } from '@/features/trip/components/TripCurrencyField';
 import { TripDateRangeField } from '@/features/trip/components/TripDateRangeField';
 import { TripMemberCapacityField } from '@/features/trip/components/TripMemberCapacityField';
+import { useDeleteTripMutation } from '@/features/trip/hooks/useDeleteTripMutation';
 import { useTripQuery } from '@/features/trip/hooks/useTripQuery';
 import { useUpdateTripMutation } from '@/features/trip/hooks/useUpdateTripMutation';
 import {
@@ -29,11 +30,13 @@ import { getTripCreationTextFieldError } from '@/features/trip/tripCreationSchem
 import type { TripDetail } from '@/features/trip/tripDetailSchema';
 import {
   canChangeTripCapacity,
+  canDeleteTrip,
   canEditTrip,
 } from '@/features/trip/tripPermission';
 import {
   ADMIN_ONLY_NOTICE,
   DELETED_TRIP_NOTICE,
+  getTripDeleteErrorNotice,
   getTripLoadErrorNotice,
   getTripUpdateErrorNotice,
   type TripSettingsExit,
@@ -41,6 +44,7 @@ import {
 } from '@/features/trip/tripSettings';
 import { isTripUpdateDraftValid } from '@/features/trip/tripUpdateSchema';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 import { TextField } from '@/shared/ui/TextField';
 import { Toast } from '@/shared/ui/Toast';
@@ -109,6 +113,8 @@ type TripSettingsFormProps = {
 
 function TripSettingsForm({ trip }: TripSettingsFormProps) {
   const updateTripMutation = useUpdateTripMutation();
+  const deleteTripMutation = useDeleteTripMutation();
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [draft, setDraft] = useState<TripUpdateDraft>(() =>
     toTripUpdateDraft(trip),
   );
@@ -118,7 +124,11 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
   const canChangeCapacity = canChangeTripCapacity(trip);
   const request = buildTripUpdateRequest(trip, draft);
   const isLeaving = notice?.exitTo != null;
-  const isBusy = updateTripMutation.isPending || isLeaving;
+  const isBusy =
+    updateTripMutation.isPending ||
+    deleteTripMutation.isPending ||
+    deleteTripMutation.isSuccess ||
+    isLeaving;
   const canSave =
     hasTripUpdateChanges(request) &&
     isTripUpdateDraftValid(trip, draft) &&
@@ -173,7 +183,24 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
   }
 
   function handlePressDelete() {
-    // 4단계에서 삭제 확인 팝업을 연결한다.
+    setIsDeleteDialogVisible(true);
+  }
+
+  function handleCancelDelete() {
+    setIsDeleteDialogVisible(false);
+  }
+
+  async function handleConfirmDelete() {
+    if (deleteTripMutation.isPending) return;
+
+    try {
+      await deleteTripMutation.mutateAsync(trip.tripId);
+      setIsDeleteDialogVisible(false);
+      leaveTripSettings('trips');
+    } catch (error) {
+      setIsDeleteDialogVisible(false);
+      setNotice(getTripDeleteErrorNotice(error));
+    }
   }
 
   function handlePressHeaderBack() {
@@ -251,7 +278,7 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
             label="여행 삭제"
             variant="light"
             onPress={handlePressDelete}
-            isDisabled={isBusy}
+            isDisabled={isBusy || !canDeleteTrip(trip)}
             className="bg-gray-1 flex-1"
           />
           <Button
@@ -262,6 +289,17 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
           />
         </View>
       </KeyboardAvoidingView>
+
+      <ConfirmDialog
+        visible={isDeleteDialogVisible}
+        title="여행방을 삭제할까요?"
+        description={'모든 정보가 영구적으로 삭제되며\n복원할 수 없습니다.'}
+        cancelLabel="취소"
+        confirmLabel="삭제하기"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        isConfirming={deleteTripMutation.isPending}
+      />
 
       {notice ? (
         <Toast message={notice.message} onDismiss={handleDismissNotice} />

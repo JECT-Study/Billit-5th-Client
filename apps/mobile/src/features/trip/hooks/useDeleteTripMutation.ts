@@ -20,9 +20,7 @@ export function useDeleteTripMutation() {
   return useMutation({
     mutationFn: deleteTripIgnoringNotFound,
     retry: false,
-    onSuccess: (_, tripId) => {
-      queryClient.removeQueries({ queryKey: tripKeys.detail(tripId) });
-      return queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
   });
 }
