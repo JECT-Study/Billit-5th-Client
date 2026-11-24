@@ -7,6 +7,7 @@ import type {
 import type {
   TripListFilter,
   TripListItem,
+  TripScheduleStatus,
 } from '@/features/trip/tripListSchema';
 import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
 import type { TripSummary } from '@/features/trip/tripSummarySchema';
@@ -22,7 +23,9 @@ function addDays(days: number) {
   return formatIsoDate(date);
 }
 
-const mockTrips: TripListItem[] = [
+type MockTrip = Omit<TripListItem, 'scheduleStatus'>;
+
+const mockTrips: MockTrip[] = [
   {
     tripId: 'trip-ongoing',
     name: '샌프란시스코 10박 12일 여행',
@@ -88,7 +91,7 @@ const mockTrips: TripListItem[] = [
     myRole: 'MEMBER',
     myShareAmountKrw: '0.00',
   },
-  ...Array.from({ length: 22 }, (_, index): TripListItem => ({
+  ...Array.from({ length: 22 }, (_, index): MockTrip => ({
     tripId: `trip-ended-${index + 1}`,
     name: `지난 여행 ${index + 1}`,
     countryCode: 'KR',
@@ -104,7 +107,7 @@ const mockTrips: TripListItem[] = [
 ];
 
 /** 다른 목(초대 참여 등)에서 만든 여행을 목록 맨 앞에 추가한다. */
-export function addMockTrip(trip: TripListItem) {
+export function addMockTrip(trip: MockTrip) {
   mockTrips.unshift(trip);
 }
 
@@ -116,14 +119,22 @@ export function findMockTrip(tripId: string) {
 const createdTripsByIdempotencyKey = new Map<string, TripSummary>();
 let nextCreatedTripNumber = 1;
 
-function matchesFilter(trip: TripListItem, filter: TripListFilter) {
-  const today = formatIsoDate(new Date());
+function getScheduleStatus(
+  trip: Pick<MockTrip, 'status' | 'startDate' | 'endDate'>,
+  today: string,
+): TripScheduleStatus {
+  if (trip.status === 'UNCONFIRMED') return 'INVITING';
+  if (trip.endDate < today) return 'ENDED';
+  if (trip.startDate > today) return 'UPCOMING';
+  return 'ONGOING';
+}
 
-  if (filter === 'INVITING') return trip.status === 'UNCONFIRMED';
-  if (filter === 'UPCOMING') {
-    return trip.status === 'CONFIRMED' && trip.startDate > today;
-  }
-  return trip.status === 'CONFIRMED' && trip.endDate < today;
+function toTripListItem(trip: MockTrip, today: string): TripListItem {
+  return { ...trip, scheduleStatus: getScheduleStatus(trip, today) };
+}
+
+function matchesFilter(trip: MockTrip, filter: TripListFilter, today: string) {
+  return getScheduleStatus(trip, today) === filter;
 }
 
 function toResponse<T>(
@@ -186,13 +197,16 @@ const tripMockAdapter: AxiosAdapter = async (config) => {
   const page = Number(config.params?.page ?? 0);
   const size = Number(config.params?.size ?? 20);
   const filter = config.params?.filter as TripListFilter | undefined;
+  const today = config.params?.today as string;
   const trips = filter
-    ? mockTrips.filter((trip) => matchesFilter(trip, filter))
+    ? mockTrips.filter((trip) => matchesFilter(trip, filter, today))
     : mockTrips;
   const start = page * size;
 
   return toResponse(config, {
-    data: trips.slice(start, start + size),
+    data: trips
+      .slice(start, start + size)
+      .map((trip) => toTripListItem(trip, today)),
     page: {
       page,
       size,

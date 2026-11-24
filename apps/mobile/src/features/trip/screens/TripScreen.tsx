@@ -19,10 +19,7 @@ import { TripHomeHeader } from '@/features/trip/components/TripHomeHeader';
 import { TripListItem } from '@/features/trip/components/TripListItem';
 import { useInviteCodeDialogOnSignup } from '@/features/trip/hooks/useInviteCodeDialogOnSignup';
 import { useTripListQuery } from '@/features/trip/hooks/useTripListQuery';
-import {
-  getTodayIsoDate,
-  getTripDisplayStatus,
-} from '@/features/trip/tripListDisplay';
+import { getTodayIsoDate } from '@/features/trip/tripListDisplay';
 import type { TripListFilter } from '@/features/trip/tripListSchema';
 import { Button } from '@/shared/ui/Button';
 import { GradientBackground } from '@/shared/ui/GradientBackground';
@@ -35,21 +32,17 @@ export function TripScreen() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const inviteCodeDialogState = useInviteCodeDialogOnSignup();
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-  const tripListQuery = useTripListQuery(filter);
-  const allTripListQuery = useTripListQuery();
   const today = getTodayIsoDate();
+  const tripListQuery = useTripListQuery(today, filter);
+  const ongoingTripListQuery = useTripListQuery(today, 'ONGOING');
 
   const trips = useMemo(
     () => tripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [tripListQuery.data],
   );
-  const allTrips = useMemo(
-    () => allTripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
-    [allTripListQuery.data],
-  );
-  // 목록 탭과 무관하게 전체 여행방을 기준으로 찾는다
-  const ongoingTrips = allTrips.filter(
-    (trip) => getTripDisplayStatus(trip, today) === 'ONGOING',
+  const ongoingTrips = useMemo(
+    () => ongoingTripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [ongoingTripListQuery.data],
   );
   const activeOngoingTripIndex = Math.min(
     activeCarouselIndex,
@@ -193,7 +186,6 @@ export function TripScreen() {
             <TripListItem
               key={trip.tripId}
               trip={trip}
-              status={getTripDisplayStatus(trip, today)}
               today={today}
               onPress={handlePressTrip}
             />

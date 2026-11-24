@@ -25,6 +25,7 @@ type CreateTripVariables = {
 };
 
 type ListTripsParams = {
+  today: string;
   page?: number;
   size?: number;
   filter?: TripListFilter;
@@ -50,12 +51,14 @@ export async function createTrip({
 }
 
 export async function listTrips({
+  today,
   page = 0,
   size = 20,
   filter,
-}: ListTripsParams = {}): Promise<TripListResponse> {
+}: ListTripsParams): Promise<TripListResponse> {
   const response = await apiClient.get<unknown>(tripPath, {
     params: {
+      today,
       page,
       size,
       ...(filter ? { filter } : {}),

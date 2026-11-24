@@ -19,12 +19,14 @@ function getQueryOptions() {
 }
 
 describe('useTripListQuery', () => {
+  const today = '2026-11-24';
+
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('전체 여행 목록을 첫 페이지부터 조회한다', async () => {
-    useTripListQuery();
+    useTripListQuery(today);
 
     const options = getQueryOptions();
     const queryFn = options.queryFn as ({
@@ -35,13 +37,13 @@ describe('useTripListQuery', () => {
 
     await queryFn({ pageParam: 0 });
 
-    expect(options.queryKey).toEqual(tripKeys.list());
+    expect(options.queryKey).toEqual(tripKeys.list(today));
     expect(options.initialPageParam).toBe(0);
-    expect(listTrips).toHaveBeenCalledWith({ page: 0, size: 20 });
+    expect(listTrips).toHaveBeenCalledWith({ today, page: 0, size: 20 });
   });
 
   it('필터별로 별도 쿼리 키와 요청을 사용한다', async () => {
-    useTripListQuery('UPCOMING');
+    useTripListQuery(today, 'UPCOMING');
 
     const options = getQueryOptions();
     const queryFn = options.queryFn as ({
@@ -52,8 +54,9 @@ describe('useTripListQuery', () => {
 
     await queryFn({ pageParam: 2 });
 
-    expect(options.queryKey).toEqual(tripKeys.list('UPCOMING'));
+    expect(options.queryKey).toEqual(tripKeys.list(today, 'UPCOMING'));
     expect(listTrips).toHaveBeenCalledWith({
+      today,
       page: 2,
       size: 20,
       filter: 'UPCOMING',
@@ -61,7 +64,7 @@ describe('useTripListQuery', () => {
   });
 
   it('다음 페이지 존재 여부는 서버 응답의 hasNext를 따른다', () => {
-    useTripListQuery();
+    useTripListQuery(today);
 
     const options = getQueryOptions();
     const getNextPageParam = options.getNextPageParam as (lastPage: {

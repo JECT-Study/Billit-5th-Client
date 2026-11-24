@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-export const tripListFilterSchema = z.enum(['INVITING', 'UPCOMING', 'ENDED']);
+export const tripScheduleStatusSchema = z.enum([
+  'INVITING',
+  'UPCOMING',
+  'ONGOING',
+  'ENDED',
+]);
+
+export const tripListFilterSchema = tripScheduleStatusSchema;
 
 export const tripListItemSchema = z.object({
   tripId: z.string(),
@@ -12,6 +19,7 @@ export const tripListItemSchema = z.object({
   memberCapacity: z.number().int().positive(),
   registeredMemberCount: z.number().int().nonnegative(),
   status: z.enum(['UNCONFIRMED', 'CONFIRMED']),
+  scheduleStatus: tripScheduleStatusSchema,
   myRole: z.enum(['ADMIN', 'MEMBER']),
   myShareAmountKrw: z.string().regex(/^-?(0|[1-9]\d*)\.\d{2}$/),
 });
@@ -30,6 +38,7 @@ export const tripListResponseSchema = z.object({
 });
 
 export type TripListFilter = z.infer<typeof tripListFilterSchema>;
+export type TripScheduleStatus = z.infer<typeof tripScheduleStatusSchema>;
 export type TripListItem = z.infer<typeof tripListItemSchema>;
 export type TripListPage = z.infer<typeof tripListPageSchema>;
 export type TripListResponse = z.infer<typeof tripListResponseSchema>;
