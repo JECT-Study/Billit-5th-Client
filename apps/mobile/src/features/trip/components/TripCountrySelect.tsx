@@ -13,6 +13,8 @@ type TripCountrySelectProps = {
   customCountryName: string;
   onSelectCountry: (code: TripCountryCode) => void;
   onChangeCustomCountryName: (value: string) => void;
+  // 「기타」를 새로 골랐을 때만 바로 입력하게 한다. 이미 저장된 기타 국가를 열 때는 끈다.
+  isCustomInputAutoFocused?: boolean;
 };
 
 const CUSTOM_COUNTRY_MAX_LENGTH = 10;
@@ -22,6 +24,7 @@ export function TripCountrySelect({
   customCountryName,
   onSelectCountry,
   onChangeCustomCountryName,
+  isCustomInputAutoFocused = true,
 }: TripCountrySelectProps) {
   const [isCustomFocused, setIsCustomFocused] = useState(false);
 
@@ -73,7 +76,7 @@ export function TripCountrySelect({
                   placeholder="여행국가 입력"
                   placeholderTextColor={COLORS['gray-6']}
                   maxLength={CUSTOM_COUNTRY_MAX_LENGTH}
-                  autoFocus
+                  autoFocus={isCustomInputAutoFocused}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                   selectionColor={COLORS['sky-60']}

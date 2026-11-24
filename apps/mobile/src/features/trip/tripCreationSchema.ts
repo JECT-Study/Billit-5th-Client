@@ -35,9 +35,9 @@ export const nicknameSchema = z
   .string()
   .regex(/^[가-힣A-Za-z0-9]{1,10}$/, nicknameMessage);
 
-const nameStepSchema = z.object({ name: nameSchema });
+export const nameStepSchema = z.object({ name: nameSchema });
 
-const countryStepSchema = z
+export const countryStepSchema = z
   .object({
     countryCode: z.enum(TRIP_COUNTRY_CODES, {
       error: '여행 국가를 선택해주세요.',
@@ -51,11 +51,11 @@ const countryStepSchema = z
     { message: countryNameMessage, path: ['customCountryName'] },
   );
 
-const currencyStepSchema = z.object({
+export const currencyStepSchema = z.object({
   baseCurrency: z.enum(TRIP_CURRENCY_CODES),
 });
 
-const dateStepSchema = z
+export const dateStepSchema = z
   .object({
     startDate: z.iso.date({ error: dateMessage }),
     endDate: z.iso.date({ error: dateMessage }),
