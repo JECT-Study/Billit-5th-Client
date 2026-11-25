@@ -1,10 +1,10 @@
 import type {
   TripListFilter,
   TripListItem,
+  TripScheduleStatus,
 } from '@/features/trip/tripListSchema';
 
-// 목록 화면에서 보여주는 여행방 상태
-export type TripDisplayStatus = 'ONGOING' | 'INVITING' | 'UPCOMING' | 'ENDED';
+export type TripDisplayStatus = TripScheduleStatus;
 
 export const TRIP_STATUS_LABELS: Record<TripDisplayStatus, string> = {
   ONGOING: '진행중',
@@ -29,17 +29,6 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 function toDayNumber(isoDate: string) {
   return Math.floor(Date.parse(`${isoDate}T00:00:00Z`) / DAY_MS);
-}
-
-/** 서버 확정 상태와 여행 기간으로 목록에 표시할 상태. today는 YYYY-MM-DD. */
-export function getTripDisplayStatus(
-  trip: Pick<TripListItem, 'status' | 'startDate' | 'endDate'>,
-  today: string,
-): TripDisplayStatus {
-  if (trip.status === 'UNCONFIRMED') return 'INVITING';
-  if (trip.endDate < today) return 'ENDED';
-  if (trip.startDate > today) return 'UPCOMING';
-  return 'ONGOING';
 }
 
 /** 여행 기간 중 지나간 비율(0~1). 기간 밖이면 0 또는 1. */

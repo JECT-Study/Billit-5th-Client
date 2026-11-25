@@ -61,6 +61,7 @@ const tripListResponse = {
       memberCapacity: 3,
       registeredMemberCount: 1,
       status: 'UNCONFIRMED',
+      scheduleStatus: 'INVITING',
       myRole: 'ADMIN',
       myShareAmountKrw: '0.00',
     },
@@ -128,6 +129,8 @@ it('서버의 멱등성 키 충돌 오류를 호출자에게 전달한다', asyn
 });
 
 describe('trip list api', () => {
+  const today = '2026-11-24';
+
   it('기본 페이지와 크기로 전체 여행 목록을 조회한다', async () => {
     let receivedUrl: URL | undefined;
 
@@ -138,8 +141,9 @@ describe('trip list api', () => {
       }),
     );
 
-    await expect(listTrips()).resolves.toEqual(tripListResponse);
+    await expect(listTrips({ today })).resolves.toEqual(tripListResponse);
 
+    expect(receivedUrl?.searchParams.get('today')).toBe(today);
     expect(receivedUrl?.searchParams.get('page')).toBe('0');
     expect(receivedUrl?.searchParams.get('size')).toBe('20');
     expect(receivedUrl?.searchParams.has('filter')).toBe(false);
@@ -155,8 +159,9 @@ describe('trip list api', () => {
       }),
     );
 
-    await listTrips({ page: 1, size: 10, filter: 'UPCOMING' });
+    await listTrips({ today, page: 1, size: 10, filter: 'UPCOMING' });
 
+    expect(receivedUrl?.searchParams.get('today')).toBe(today);
     expect(receivedUrl?.searchParams.get('page')).toBe('1');
     expect(receivedUrl?.searchParams.get('size')).toBe('10');
     expect(receivedUrl?.searchParams.get('filter')).toBe('UPCOMING');
@@ -172,7 +177,7 @@ describe('trip list api', () => {
       ),
     );
 
-    await expect(listTrips()).rejects.toThrow();
+    await expect(listTrips({ today })).rejects.toThrow();
   });
 });
 

@@ -1,9 +1,11 @@
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -19,10 +21,7 @@ import { TripHomeHeader } from '@/features/trip/components/TripHomeHeader';
 import { TripListItem } from '@/features/trip/components/TripListItem';
 import { useInviteCodeDialogOnSignup } from '@/features/trip/hooks/useInviteCodeDialogOnSignup';
 import { useTripListQuery } from '@/features/trip/hooks/useTripListQuery';
-import {
-  getTodayIsoDate,
-  getTripDisplayStatus,
-} from '@/features/trip/tripListDisplay';
+import { getTodayIsoDate } from '@/features/trip/tripListDisplay';
 import type { TripListFilter } from '@/features/trip/tripListSchema';
 import { Button } from '@/shared/ui/Button';
 import { GradientBackground } from '@/shared/ui/GradientBackground';
@@ -30,26 +29,62 @@ import { MoreIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 import { COLORS } from '@/theme/theme.generated';
 
+let nextListSession = 0;
+
 export function TripScreen() {
   const [filter, setFilter] = useState<TripListFilter | undefined>(undefined);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const inviteCodeDialogState = useInviteCodeDialogOnSignup();
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-  const tripListQuery = useTripListQuery(filter);
-  const allTripListQuery = useTripListQuery();
-  const today = getTodayIsoDate();
+  const [listSession, setListSession] = useState(() => ({
+    today: getTodayIsoDate(),
+    id: ++nextListSession,
+    isManualRefresh: false,
+  }));
+  const hasFocused = useRef(false);
+  const { today, id: sessionId } = listSession;
+  const tripListQuery = useTripListQuery(today, filter, sessionId);
+  const ongoingTripListQuery = useTripListQuery(today, 'ONGOING', sessionId);
+
+  const handleRefreshList = useCallback(() => {
+    setListSession({
+      today: getTodayIsoDate(),
+      id: ++nextListSession,
+      isManualRefresh: false,
+    });
+    setActiveCarouselIndex(0);
+  }, []);
+
+  function handlePullToRefresh() {
+    setListSession({
+      today: getTodayIsoDate(),
+      id: ++nextListSession,
+      isManualRefresh: true,
+    });
+    setActiveCarouselIndex(0);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      if (hasFocused.current) handleRefreshList();
+      hasFocused.current = true;
+      let previousState = AppState.currentState;
+      const subscription = AppState.addEventListener('change', (state) => {
+        if (state === 'active' && previousState !== 'active')
+          handleRefreshList();
+        previousState = state;
+      });
+      return () => subscription.remove();
+    }, [handleRefreshList]),
+  );
 
   const trips = useMemo(
     () => tripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [tripListQuery.data],
   );
-  const allTrips = useMemo(
-    () => allTripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
-    [allTripListQuery.data],
-  );
-  // 목록 탭과 무관하게 전체 여행방을 기준으로 찾는다
-  const ongoingTrips = allTrips.filter(
-    (trip) => getTripDisplayStatus(trip, today) === 'ONGOING',
+  const ongoingTrips = useMemo(
+    () => ongoingTripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
+    [ongoingTripListQuery.data],
   );
   const activeOngoingTripIndex = Math.min(
     activeCarouselIndex,
@@ -96,6 +131,7 @@ export function TripScreen() {
   }
 
   function handleChangeFilter(nextFilter: TripListFilter | undefined) {
+    setListSession((current) => ({ ...current, isManualRefresh: false }));
     setFilter(nextFilter);
   }
 
@@ -123,10 +159,22 @@ export function TripScreen() {
       <SafeAreaView edges={['top', 'left', 'right']} className="flex-1">
         <GradientBackground />
         <TripHomeHeader onPressNotification={handlePressNotification} />
-        <TripEmptyState
-          onPressCreateTrip={handlePressCreateTrip}
-          onPressJoinWithInviteCode={handlePressJoinWithInviteCode}
-        />
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={
+                listSession.isManualRefresh && tripListQuery.isPending
+              }
+              onRefresh={handlePullToRefresh}
+            />
+          }
+        >
+          <TripEmptyState
+            onPressCreateTrip={handlePressCreateTrip}
+            onPressJoinWithInviteCode={handlePressJoinWithInviteCode}
+          />
+        </ScrollView>
         {inviteCodeDialog}
       </SafeAreaView>
     );
@@ -140,6 +188,12 @@ export function TripScreen() {
         className="bg-surface-default flex-1"
         contentContainerClassName="pb-[120px]"
         onScroll={handleScroll}
+        refreshControl={
+          <RefreshControl
+            refreshing={listSession.isManualRefresh && tripListQuery.isPending}
+            onRefresh={handlePullToRefresh}
+          />
+        }
         removeClippedSubviews={false}
         scrollEventThrottle={100}
         showsVerticalScrollIndicator={false}
@@ -193,7 +247,6 @@ export function TripScreen() {
             <TripListItem
               key={trip.tripId}
               trip={trip}
-              status={getTripDisplayStatus(trip, today)}
               today={today}
               onPress={handlePressTrip}
             />
