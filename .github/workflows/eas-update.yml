@@ -1,0 +1,72 @@
+# 모바일 앱(apps/mobile) OTA 업데이트. develop에 머지되면 preview 채널로 eas update를 실행함
+#  - 저장소 변수 EAS_UPDATE_ENABLED가 true일 때만 동작함(개발 서버 도메인이 나오기 전에는 건너뜀)
+#  - runtimeVersion이 fingerprint라 네이티브 설정이 바뀐 커밋의 업데이트는 기존 빌드에 적용되지 않음. 이때는 다시 빌드해야 함
+name: eas-update
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.nvmrc'
+      - '.github/workflows/eas-update.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eas-update-preview
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: eas update (preview)
+    if: vars.EAS_UPDATE_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # preview 환경 변수(EXPO_PUBLIC_API_URL 등)는 EAS 서버에서 가져옴
+      - name: Publish update
+        working-directory: apps/mobile
+        # 커밋 메시지는 셸에 직접 넣지 않고 환경 변수로 넘김
+        env:
+          UPDATE_MESSAGE: ${{ github.event.head_commit.message || github.sha }}
+        run: >-
+          eas update
+          --channel preview
+          --environment preview
+          --message "$UPDATE_MESSAGE"
+          --non-interactive
