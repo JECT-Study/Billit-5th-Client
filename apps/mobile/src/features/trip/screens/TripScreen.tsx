@@ -91,6 +91,7 @@ export function TripScreen() {
     Math.max(ongoingTrips.length - 1, 0),
   );
   const isEmpty = !tripListQuery.isPending && trips.length === 0;
+  const isInitialLoading = filter === undefined && tripListQuery.isPending;
 
   function handlePressNotification() {
     // TODO: 알림 화면이 생기면 이동
@@ -151,6 +152,17 @@ export function TripScreen() {
     ) {
       void tripListQuery.fetchNextPage();
     }
+  }
+
+  if (isInitialLoading) {
+    return (
+      <SafeAreaView edges={['top', 'left', 'right']} className="flex-1">
+        <GradientBackground />
+        <TripHomeHeader onPressNotification={handlePressNotification} />
+        <View className="bg-surface-default flex-1" />
+        {inviteCodeDialog}
+      </SafeAreaView>
+    );
   }
 
   // 전체 여행 목록이 비었을 때는 기존 첫 여행방 안내
