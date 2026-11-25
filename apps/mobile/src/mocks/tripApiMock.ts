@@ -361,10 +361,7 @@ function toInvalidRequestError(
   return toApiError(config, 400, 'COMMON_INVALID_REQUEST', message);
 }
 
-function handleUpdateTrip(
-  config: InternalAxiosRequestConfig,
-  trip: MockTrip,
-) {
+function handleUpdateTrip(config: InternalAxiosRequestConfig, trip: MockTrip) {
   const request = parseRequestBody<UpdateTripRequest>(config.data ?? '{}');
 
   if (Object.keys(request).length === 0) {
@@ -426,10 +423,7 @@ function handleUpdateTrip(
   return toResponse(config, { data: toTripSummary(trip) });
 }
 
-function handleDeleteTrip(
-  config: InternalAxiosRequestConfig,
-  trip: MockTrip,
-) {
+function handleDeleteTrip(config: InternalAxiosRequestConfig, trip: MockTrip) {
   if (getMockTripDetail(trip).hasRecords) {
     throw toApiError(
       config,
