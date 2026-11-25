@@ -7,6 +7,7 @@ import { router, Stack, usePathname, useSegments } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 
 import { apiClient } from '@/lib/api';
+import { usePreviewUpdate } from '@/lib/previewUpdate';
 import { queryClient } from '@/lib/queryClient';
 
 import { onSessionExpired } from '@/features/auth/services/sessionEvents';
@@ -35,6 +36,8 @@ export default function RootLayout() {
     'SUIT-ExtraBold': require('../../../packages/fonts/SUIT-ExtraBold.otf'),
     'SUIT-Heavy': require('../../../packages/fonts/SUIT-Heavy.otf'),
   });
+
+  usePreviewUpdate();
 
   const pathname = usePathname();
   const segments = useSegments();
