@@ -118,7 +118,7 @@ const config: ExpoConfig = {
     ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
   },
   runtimeVersion: {
-    policy: 'appVersion',
+    policy: 'fingerprint',
   },
   ...(easProjectId
     ? {
