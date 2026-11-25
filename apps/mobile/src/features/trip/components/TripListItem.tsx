@@ -16,7 +16,6 @@ import { Text } from '@/shared/ui/Text';
 
 type TripListItemProps = {
   trip: TripListItemData;
-  status: TripDisplayStatus;
   today: string;
   onPress: (tripId: string) => void;
 };
@@ -29,12 +28,8 @@ const CHIP_TONES: Record<TripDisplayStatus, SelectionChipTone> = {
 };
 
 // 여행방 목록 행
-export function TripListItem({
-  trip,
-  status,
-  today,
-  onPress,
-}: TripListItemProps) {
+export function TripListItem({ trip, today, onPress }: TripListItemProps) {
+  const status: TripDisplayStatus = trip.scheduleStatus;
   const isOngoing = status === 'ONGOING';
   const progressPercent = Math.round(getTripElapsedRatio(trip, today) * 100);
 

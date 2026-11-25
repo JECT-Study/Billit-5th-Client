@@ -3,6 +3,7 @@ import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios';
 import type {
   TripListFilter,
   TripListItem,
+  TripScheduleStatus,
 } from '@/features/trip/tripListSchema';
 import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
 import type { UpdateTripRequest } from '@/features/trip/services/tripUpdateRequest';
@@ -26,7 +27,9 @@ function addDays(days: number) {
   return formatIsoDate(date);
 }
 
-const mockTrips: TripListItem[] = [
+type MockTrip = Omit<TripListItem, 'scheduleStatus'>;
+
+const mockTrips: MockTrip[] = [
   {
     tripId: 'trip-ongoing',
     name: '샌프란시스코 10박 12일 여행',
@@ -120,7 +123,7 @@ const mockTrips: TripListItem[] = [
     myRole: 'MEMBER',
     myShareAmountKrw: '0.00',
   },
-  ...Array.from({ length: 22 }, (_, index): TripListItem => ({
+  ...Array.from({ length: 22 }, (_, index): MockTrip => ({
     tripId: `trip-ended-${index + 1}`,
     name: `지난 여행 ${index + 1}`,
     countryCode: 'KR',
@@ -136,7 +139,7 @@ const mockTrips: TripListItem[] = [
 ];
 
 /** 다른 목(초대 참여 등)에서 만든 여행을 목록 맨 앞에 추가한다. */
-export function addMockTrip(trip: TripListItem) {
+export function addMockTrip(trip: MockTrip) {
   mockTrips.unshift(trip);
 }
 
@@ -182,7 +185,7 @@ function toParticipant(
 
 const tripIdsWithRecords = new Set(['trip-with-records']);
 
-function createDefaultDetail(trip: TripListItem): MockTripDetail {
+function createDefaultDetail(trip: MockTrip): MockTripDetail {
   return {
     baseCurrency:
       TRIP_COUNTRIES.find(({ code }) => code === trip.countryCode)?.currency ??
@@ -242,7 +245,7 @@ const mockTripDetails = new Map<string, MockTripDetail>([
   ],
 ]);
 
-function getMockTripDetail(trip: TripListItem) {
+function getMockTripDetail(trip: MockTrip) {
   const existing = mockTripDetails.get(trip.tripId);
   if (existing) return existing;
 
@@ -251,7 +254,7 @@ function getMockTripDetail(trip: TripListItem) {
   return detail;
 }
 
-function toTripSummary(trip: TripListItem): TripSummary {
+function toTripSummary(trip: MockTrip): TripSummary {
   const { myShareAmountKrw: _, ...rest } = trip;
   return {
     ...rest,
@@ -260,7 +263,7 @@ function toTripSummary(trip: TripListItem): TripSummary {
   };
 }
 
-function toTripDetail(trip: TripListItem): TripDetail {
+function toTripDetail(trip: MockTrip): TripDetail {
   return {
     ...toTripSummary(trip),
     participants: getMockTripDetail(trip).participants,
@@ -270,14 +273,22 @@ function toTripDetail(trip: TripListItem): TripDetail {
 const createdTripsByIdempotencyKey = new Map<string, TripSummary>();
 let nextCreatedTripNumber = 1;
 
-function matchesFilter(trip: TripListItem, filter: TripListFilter) {
-  const today = formatIsoDate(new Date());
+function getScheduleStatus(
+  trip: Pick<MockTrip, 'status' | 'startDate' | 'endDate'>,
+  today: string,
+): TripScheduleStatus {
+  if (trip.status === 'UNCONFIRMED') return 'INVITING';
+  if (trip.endDate < today) return 'ENDED';
+  if (trip.startDate > today) return 'UPCOMING';
+  return 'ONGOING';
+}
 
-  if (filter === 'INVITING') return trip.status === 'UNCONFIRMED';
-  if (filter === 'UPCOMING') {
-    return trip.status === 'CONFIRMED' && trip.startDate > today;
-  }
-  return trip.status === 'CONFIRMED' && trip.endDate < today;
+function toTripListItem(trip: MockTrip, today: string): TripListItem {
+  return { ...trip, scheduleStatus: getScheduleStatus(trip, today) };
+}
+
+function matchesFilter(trip: MockTrip, filter: TripListFilter, today: string) {
+  return getScheduleStatus(trip, today) === filter;
 }
 
 function handleCreateTrip(config: InternalAxiosRequestConfig) {
@@ -324,13 +335,16 @@ function handleListTrips(config: InternalAxiosRequestConfig) {
   const page = Number(config.params?.page ?? 0);
   const size = Number(config.params?.size ?? 20);
   const filter = config.params?.filter as TripListFilter | undefined;
+  const today = config.params?.today as string;
   const trips = filter
-    ? mockTrips.filter((trip) => matchesFilter(trip, filter))
+    ? mockTrips.filter((trip) => matchesFilter(trip, filter, today))
     : mockTrips;
   const start = page * size;
 
   return toResponse(config, {
-    data: trips.slice(start, start + size),
+    data: trips
+      .slice(start, start + size)
+      .map((trip) => toTripListItem(trip, today)),
     page: {
       page,
       size,
@@ -349,7 +363,7 @@ function toInvalidRequestError(
 
 function handleUpdateTrip(
   config: InternalAxiosRequestConfig,
-  trip: TripListItem,
+  trip: MockTrip,
 ) {
   const request = parseRequestBody<UpdateTripRequest>(config.data ?? '{}');
 
@@ -414,7 +428,7 @@ function handleUpdateTrip(
 
 function handleDeleteTrip(
   config: InternalAxiosRequestConfig,
-  trip: TripListItem,
+  trip: MockTrip,
 ) {
   if (getMockTripDetail(trip).hasRecords) {
     throw toApiError(
