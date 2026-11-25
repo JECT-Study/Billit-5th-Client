@@ -1,5 +1,10 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import {
+  type NativeStackNavigationProp,
+  router,
+  useLocalSearchParams,
+  useNavigation,
+} from 'expo-router';
+import { useEffect, useState } from 'react';
 
 const FROM_SIGNUP_VALUE = 'true';
 
@@ -12,7 +17,19 @@ export const TRIPS_AFTER_SIGNUP_HREF = {
 export function useInviteCodeDialogOnSignup() {
   const { fromSignup } = useLocalSearchParams<{ fromSignup?: string }>();
   const isFromSignup = fromSignup === FROM_SIGNUP_VALUE;
-  const [isOpen, setIsOpen] = useState(() => isFromSignup);
+  const rootNavigation =
+    useNavigation<NativeStackNavigationProp<ReactNavigation.RootParamList>>(
+      '/',
+    );
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isFromSignup) return;
+
+    return rootNavigation.addListener('transitionEnd', (event) => {
+      if (!event.data.closing) setIsOpen(true);
+    });
+  }, [isFromSignup, rootNavigation]);
 
   function open() {
     setIsOpen(true);
