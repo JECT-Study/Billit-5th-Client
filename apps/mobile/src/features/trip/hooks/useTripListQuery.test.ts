@@ -76,4 +76,10 @@ describe('useTripListQuery', () => {
       undefined,
     );
   });
+
+  it('새 조회 세션은 같은 날짜와 필터여도 별도 캐시를 사용한다', () => {
+    expect(tripKeys.list(today, 'ONGOING', 1)).not.toEqual(
+      tripKeys.list(today, 'ONGOING', 2),
+    );
+  });
 });

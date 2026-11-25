@@ -6,9 +6,13 @@ import type { TripListFilter } from '@/features/trip/tripListSchema';
 
 const tripListPageSize = 20;
 
-export function useTripListQuery(today: string, filter?: TripListFilter) {
+export function useTripListQuery(
+  today: string,
+  filter?: TripListFilter,
+  session = 0,
+) {
   return useInfiniteQuery({
-    queryKey: tripKeys.list(today, filter),
+    queryKey: tripKeys.list(today, filter, session),
     queryFn: ({ pageParam }) =>
       listTrips({ today, page: pageParam, size: tripListPageSize, filter }),
     initialPageParam: 0,

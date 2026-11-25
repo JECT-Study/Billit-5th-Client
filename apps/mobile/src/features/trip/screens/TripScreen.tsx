@@ -1,9 +1,11 @@
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -27,14 +29,54 @@ import { MoreIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 import { COLORS } from '@/theme/theme.generated';
 
+let nextListSession = 0;
+
 export function TripScreen() {
   const [filter, setFilter] = useState<TripListFilter | undefined>(undefined);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const inviteCodeDialogState = useInviteCodeDialogOnSignup();
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-  const today = getTodayIsoDate();
-  const tripListQuery = useTripListQuery(today, filter);
-  const ongoingTripListQuery = useTripListQuery(today, 'ONGOING');
+  const [listSession, setListSession] = useState(() => ({
+    today: getTodayIsoDate(),
+    id: ++nextListSession,
+    isManualRefresh: false,
+  }));
+  const hasFocused = useRef(false);
+  const { today, id: sessionId } = listSession;
+  const tripListQuery = useTripListQuery(today, filter, sessionId);
+  const ongoingTripListQuery = useTripListQuery(today, 'ONGOING', sessionId);
+
+  const handleRefreshList = useCallback(() => {
+    setListSession({
+      today: getTodayIsoDate(),
+      id: ++nextListSession,
+      isManualRefresh: false,
+    });
+    setActiveCarouselIndex(0);
+  }, []);
+
+  function handlePullToRefresh() {
+    setListSession({
+      today: getTodayIsoDate(),
+      id: ++nextListSession,
+      isManualRefresh: true,
+    });
+    setActiveCarouselIndex(0);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      if (hasFocused.current) handleRefreshList();
+      hasFocused.current = true;
+      let previousState = AppState.currentState;
+      const subscription = AppState.addEventListener('change', (state) => {
+        if (state === 'active' && previousState !== 'active')
+          handleRefreshList();
+        previousState = state;
+      });
+      return () => subscription.remove();
+    }, [handleRefreshList]),
+  );
 
   const trips = useMemo(
     () => tripListQuery.data?.pages.flatMap((page) => page.data) ?? [],
@@ -89,6 +131,7 @@ export function TripScreen() {
   }
 
   function handleChangeFilter(nextFilter: TripListFilter | undefined) {
+    setListSession((current) => ({ ...current, isManualRefresh: false }));
     setFilter(nextFilter);
   }
 
@@ -116,10 +159,22 @@ export function TripScreen() {
       <SafeAreaView edges={['top', 'left', 'right']} className="flex-1">
         <GradientBackground />
         <TripHomeHeader onPressNotification={handlePressNotification} />
-        <TripEmptyState
-          onPressCreateTrip={handlePressCreateTrip}
-          onPressJoinWithInviteCode={handlePressJoinWithInviteCode}
-        />
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={
+                listSession.isManualRefresh && tripListQuery.isPending
+              }
+              onRefresh={handlePullToRefresh}
+            />
+          }
+        >
+          <TripEmptyState
+            onPressCreateTrip={handlePressCreateTrip}
+            onPressJoinWithInviteCode={handlePressJoinWithInviteCode}
+          />
+        </ScrollView>
         {inviteCodeDialog}
       </SafeAreaView>
     );
@@ -133,6 +188,12 @@ export function TripScreen() {
         className="bg-surface-default flex-1"
         contentContainerClassName="pb-[120px]"
         onScroll={handleScroll}
+        refreshControl={
+          <RefreshControl
+            refreshing={listSession.isManualRefresh && tripListQuery.isPending}
+            onRefresh={handlePullToRefresh}
+          />
+        }
         removeClippedSubviews={false}
         scrollEventThrottle={100}
         showsVerticalScrollIndicator={false}
