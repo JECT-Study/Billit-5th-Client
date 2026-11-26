@@ -22,7 +22,11 @@ import { TripListItem } from '@/features/trip/components/TripListItem';
 import { useInviteCodeDialogOnSignup } from '@/features/trip/hooks/useInviteCodeDialogOnSignup';
 import { useTripListQuery } from '@/features/trip/hooks/useTripListQuery';
 import { getTodayIsoDate } from '@/features/trip/tripListDisplay';
-import type { TripListFilter } from '@/features/trip/tripListSchema';
+import type {
+  TripListFilter,
+  TripListItem as TripListItemData,
+} from '@/features/trip/tripListSchema';
+import { canOpenTripDetail } from '@/features/trip/tripPermission';
 import { Button } from '@/shared/ui/Button';
 import { GradientBackground } from '@/shared/ui/GradientBackground';
 import { MoreIcon } from '@/shared/ui/icons';
@@ -113,8 +117,12 @@ export function TripScreen() {
     <InviteCodeDialog onClose={handleCloseInviteCodeDialog} />
   ) : null;
 
-  function handlePressTrip() {
-    // TODO: 여행방 상세 화면이 생기면 이동
+  function handlePressTrip(trip: TripListItemData) {
+    if (!canOpenTripDetail(trip)) return;
+    router.push({
+      pathname: '/trips/[tripId]',
+      params: { tripId: trip.tripId },
+    });
   }
 
   function handlePressMore() {
@@ -210,6 +218,7 @@ export function TripScreen() {
                 trips={ongoingTrips}
                 activeIndex={activeOngoingTripIndex}
                 onChangeIndex={handleChangeCardIndex}
+                onPressTrip={handlePressTrip}
               />
               <View className="mt-4 flex-row items-center justify-center gap-6">
                 {ongoingTrips.map((trip, index) => (
