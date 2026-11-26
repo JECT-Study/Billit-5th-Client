@@ -31,7 +31,9 @@ import { COLORS } from '@/theme/theme.generated';
 
 let nextListSession = 0;
 
-export function TripScreen() {
+type Props = { onOpenParticipantSheet: (tripId: string) => void };
+
+export function TripScreen({ onOpenParticipantSheet }: Props) {
   const [filter, setFilter] = useState<TripListFilter | undefined>(undefined);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const inviteCodeDialogState = useInviteCodeDialogOnSignup();
@@ -113,9 +115,9 @@ export function TripScreen() {
   const inviteCodeDialog = inviteCodeDialogState.isOpen ? (
     <InviteCodeDialog onClose={handleCloseInviteCodeDialog} />
   ) : null;
-
-  function handlePressTrip() {
-    // TODO: 여행방 상세 화면이 생기면 이동
+  function handlePressTrip(tripId: string) {
+    const trip = trips.find((item) => item.tripId === tripId);
+    if (trip?.status === 'UNCONFIRMED') onOpenParticipantSheet(tripId);
   }
 
   function handlePressMore() {

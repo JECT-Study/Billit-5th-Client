@@ -47,8 +47,11 @@ export function TripCreateCompleteScreen() {
   }
 
   function handleGoToTrip() {
-    // TODO: 여행방 상세 화면이 생기면 해당 여행방으로 이동
-    router.replace('/trips');
+    if (!tripId) {
+      router.replace('/trips');
+      return;
+    }
+    router.replace({ pathname: '/trips', params: { openTripId: tripId } });
   }
 
   async function handleShareInvitation() {
