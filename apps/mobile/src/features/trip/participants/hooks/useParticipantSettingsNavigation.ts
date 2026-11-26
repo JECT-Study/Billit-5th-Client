@@ -1,6 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { router, useNavigation } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type NativeStackNavigationProp,
+  router,
+  useNavigation,
+} from 'expo-router';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 import { InteractionManager, Platform } from 'react-native';
 
 import { getTrip } from '@/features/trip/services/tripApi';
@@ -10,8 +20,13 @@ import { parseApiError } from '@/lib/apiError';
 export function useParticipantSettingsNavigation(
   tripId: string,
   onClose: () => void,
+  prepareRestoreRef: RefObject<() => void>,
 ) {
   const navigation = useNavigation();
+  const rootNavigation =
+    useNavigation<NativeStackNavigationProp<ReactNavigation.RootParamList>>(
+      '/',
+    );
   const queryClient = useQueryClient();
   const [isOpeningSettings, setOpeningSettings] = useState(false);
   const settingsNavigationPending = useRef(false);
@@ -41,16 +56,48 @@ export function useParticipantSettingsNavigation(
 
   useEffect(() => {
     let isMounted = true;
-    let restoreTask:
-      ReturnType<typeof InteractionManager.runAfterInteractions> | undefined;
-    const unsubscribeBlur = navigation.addListener('blur', () => {
-      if (awaitingSettingsReturn.current) hasLeftForSettings.current = true;
-    });
-    const unsubscribeFocus = navigation.addListener('focus', () => {
-      if (!awaitingSettingsReturn.current || !hasLeftForSettings.current)
+    let hasReturnFocus = false;
+    let hasTransitionFinished = false;
+    let hasRefreshFinished = false;
+    let shouldRestore = false;
+    let hasCompleted = false;
+
+    function finishReturnIfReady() {
+      if (
+        !isMounted ||
+        hasCompleted ||
+        !hasReturnFocus ||
+        !hasTransitionFinished ||
+        !hasRefreshFinished
+      )
         return;
+      hasCompleted = true;
       awaitingSettingsReturn.current = false;
       hasLeftForSettings.current = false;
+      if (!shouldRestore) {
+        onCloseRef.current();
+        return;
+      }
+      prepareRestoreRef.current();
+      setOpeningSettings(false);
+    }
+
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      if (!awaitingSettingsReturn.current) return;
+      hasLeftForSettings.current = true;
+      hasReturnFocus = false;
+      hasTransitionFinished = false;
+      hasRefreshFinished = false;
+      hasCompleted = false;
+    });
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      if (
+        !awaitingSettingsReturn.current ||
+        !hasLeftForSettings.current ||
+        hasReturnFocus
+      )
+        return;
+      hasReturnFocus = true;
 
       void queryClient
         .fetchQuery({
@@ -63,24 +110,33 @@ export function useParticipantSettingsNavigation(
           () => true,
           (error: unknown) => parseApiError(error)?.status !== 404,
         )
-        .then((shouldRestore) => {
+        .then((canRestore) => {
           if (!isMounted) return;
-          if (!shouldRestore) {
-            onCloseRef.current();
-            return;
-          }
-          restoreTask = InteractionManager.runAfterInteractions(() => {
-            if (isMounted) setOpeningSettings(false);
-          });
+          shouldRestore = canRestore;
+          hasRefreshFinished = true;
+          finishReturnIfReady();
         });
     });
+    const unsubscribeTransitionEnd = rootNavigation.addListener(
+      'transitionEnd',
+      (event) => {
+        if (
+          !event.data.closing ||
+          !awaitingSettingsReturn.current ||
+          !hasLeftForSettings.current
+        )
+          return;
+        hasTransitionFinished = true;
+        finishReturnIfReady();
+      },
+    );
     return () => {
       isMounted = false;
-      restoreTask?.cancel();
       unsubscribeBlur();
       unsubscribeFocus();
+      unsubscribeTransitionEnd();
     };
-  }, [navigation, queryClient, tripId]);
+  }, [navigation, prepareRestoreRef, queryClient, rootNavigation, tripId]);
 
   function openSettings() {
     if (isOpeningSettings || settingsNavigationPending.current) return;
@@ -88,5 +144,9 @@ export function useParticipantSettingsNavigation(
     setOpeningSettings(true);
   }
 
-  return { isOpeningSettings, openSettings, handleSettingsSheetDismissed };
+  return {
+    isOpeningSettings,
+    openSettings,
+    handleSettingsSheetDismissed,
+  };
 }

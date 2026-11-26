@@ -84,11 +84,28 @@ export function useParticipantSheetGesture(
       if (finished) onClose();
     });
   }
+
+  function animateToSettings(onFinished: (finished: boolean) => void) {
+    Animated.timing(sheetTranslateY, {
+      toValue: sheetHeight.current || Dimensions.get('window').height,
+      duration: 180,
+      useNativeDriver: true,
+    }).start(({ finished }) => onFinished(finished));
+  }
+
+  function prepareSheetForReturn() {
+    if (Platform.OS === 'android') {
+      sheetTranslateY.setValue(Dimensions.get('window').height);
+    }
+  }
+
   return {
     sheetHeight,
     sheetTranslateY,
     sheetPanResponder,
     handleSheetShown,
     animateClose,
+    animateToSettings,
+    prepareSheetForReturn,
   };
 }

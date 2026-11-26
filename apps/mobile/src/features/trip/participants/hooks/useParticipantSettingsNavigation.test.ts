@@ -25,11 +25,20 @@ jest.mock('@/features/trip/services/tripApi', () => ({ getTrip: jest.fn() }));
 const setOpeningSettings = jest.fn();
 const fetchQuery = jest.fn();
 const onClose = jest.fn();
-const listeners: Record<string, () => void> = {};
-const addListener = jest.fn((event: string, callback: () => void) => {
-  listeners[event] = callback;
-  return jest.fn();
-});
+const prepareRestore = jest.fn();
+const listeners: Record<
+  string,
+  (event?: { data: { closing: boolean } }) => void
+> = {};
+const addListener = jest.fn(
+  (
+    event: string,
+    callback: (event?: { data: { closing: boolean } }) => void,
+  ) => {
+    listeners[event] = callback;
+    return jest.fn();
+  },
+);
 
 async function flushPromises() {
   await Promise.resolve();
@@ -38,7 +47,9 @@ async function flushPromises() {
 }
 
 function useStartNavigation() {
-  const result = useParticipantSettingsNavigation('trip-1', onClose);
+  const result = useParticipantSettingsNavigation('trip-1', onClose, {
+    current: prepareRestore,
+  });
   for (const [effect] of jest.mocked(useEffect).mock.calls) effect();
   result.openSettings();
   result.handleSettingsSheetDismissed();
@@ -50,6 +61,7 @@ describe('참여 현황에서 여행방 설정으로 이동', () => {
     jest.clearAllMocks();
     delete listeners.focus;
     delete listeners.blur;
+    delete listeners.transitionEnd;
     jest.mocked(useState).mockReturnValue([false, setOpeningSettings]);
     jest.mocked(useNavigation).mockReturnValue({ addListener } as never);
     jest.mocked(useQueryClient).mockReturnValue({ fetchQuery } as never);
@@ -79,6 +91,9 @@ describe('참여 현황에서 여행방 설정으로 이동', () => {
     expect(fetchQuery).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: tripKeys.detail('trip-1') }),
     );
+    expect(setOpeningSettings).not.toHaveBeenCalledWith(false);
+    listeners.transitionEnd?.({ data: { closing: true } });
+    expect(prepareRestore).toHaveBeenCalledTimes(1);
     expect(setOpeningSettings).toHaveBeenLastCalledWith(false);
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -93,10 +108,12 @@ describe('참여 현황에서 여행방 설정으로 이동', () => {
     useStartNavigation();
     listeners.blur?.();
     listeners.focus?.();
+    listeners.transitionEnd?.({ data: { closing: true } });
     await flushPromises();
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(setOpeningSettings).not.toHaveBeenCalledWith(false);
+    expect(prepareRestore).not.toHaveBeenCalled();
   });
 
   it('설정 화면으로 떠나기 전 포커스 이벤트에는 복원하지 않는다', () => {
@@ -109,10 +126,21 @@ describe('참여 현황에서 여행방 설정으로 이동', () => {
     fetchQuery.mockRejectedValue(new Error('network'));
     useStartNavigation();
     listeners.blur?.();
+    listeners.transitionEnd?.({ data: { closing: true } });
     listeners.focus?.();
     await flushPromises();
 
     expect(setOpeningSettings).toHaveBeenLastCalledWith(false);
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('설정으로 이동하는 전환 종료는 복귀 완료로 취급하지 않는다', async () => {
+    fetchQuery.mockResolvedValue({ tripId: 'trip-1' });
+    useStartNavigation();
+    listeners.blur?.();
+    listeners.transitionEnd?.({ data: { closing: false } });
+    listeners.focus?.();
+    await flushPromises();
+    expect(setOpeningSettings).not.toHaveBeenCalledWith(false);
   });
 });

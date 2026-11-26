@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -45,10 +45,12 @@ export function TripParticipantSheet({ tripId, onClose }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   const scrollOffset = useRef(0);
   const [isSharing, setSharing] = useState(false);
+  const [isClosingForSettings, setClosingForSettings] = useState(false);
   const [menuTripState, setMenuTripState] = useState<string | null>(null);
   const shareInProgress = useRef(false);
+  const prepareRestoreRef = useRef<() => void>(() => {});
   const { isOpeningSettings, openSettings, handleSettingsSheetDismissed } =
-    useParticipantSettingsNavigation(tripId, onClose);
+    useParticipantSettingsNavigation(tripId, onClose, prepareRestoreRef);
   const { detail, trip, accessNotice, refresh } = useParticipantDetail(
     tripId,
     onClose,
@@ -97,19 +99,24 @@ export function TripParticipantSheet({ tripId, onClose }: Props) {
     setMessage,
   });
   const isMutating = isMutatingEditor || confirm.isPending;
-  const isBusy = isMutating || isSharing;
+  const isBusy = isMutating || isSharing || isClosingForSettings;
   const {
     sheetHeight,
     sheetTranslateY,
     sheetPanResponder,
     handleSheetShown,
     animateClose,
+    animateToSettings,
+    prepareSheetForReturn,
   } = useParticipantSheetGesture(
     isBusy,
     isOpeningSettings,
     onClose,
     scrollOffset,
   );
+  useEffect(() => {
+    prepareRestoreRef.current = prepareSheetForReturn;
+  }, [prepareSheetForReturn]);
   async function handleShare() {
     if (isBusy || shareInProgress.current) return;
     shareInProgress.current = true;
@@ -179,7 +186,15 @@ export function TripParticipantSheet({ tripId, onClose }: Props) {
     if (!canManage || isBusy || shareInProgress.current || isOpeningSettings)
       return;
     setMenuTripState(null);
-    openSettings();
+    if (Platform.OS === 'android') {
+      setClosingForSettings(true);
+      animateToSettings((finished) => {
+        setClosingForSettings(false);
+        if (finished) openSettings();
+      });
+    } else {
+      openSettings();
+    }
   }
 
   function handleToggleMenu() {
