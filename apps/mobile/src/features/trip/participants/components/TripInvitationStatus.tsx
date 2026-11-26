@@ -5,12 +5,12 @@ import ParticipantSpinner from '@/assets/images/trip/participant-spinner.svg';
 import { Text } from '@/shared/ui/Text';
 
 type TripInvitationStatusProps = {
-  memberCapacity: number;
+  registeredMemberCount: number;
   isFull: boolean;
 };
 
 export function TripInvitationStatus({
-  memberCapacity,
+  registeredMemberCount,
   isFull,
 }: TripInvitationStatusProps) {
   const [rotation] = useState(() => new Animated.Value(0));
@@ -53,7 +53,7 @@ export function TripInvitationStatus({
   return (
     <View className="bg-sky-20 rounded-100 h-28 flex-row items-center justify-center gap-10 px-16">
       <Text className="text-sky-70 text-label-1 font-semibold">
-        {isFull ? '모두 참여완료' : `${memberCapacity}명 참여중`}
+        {isFull ? '모두 참여완료' : `${registeredMemberCount}명 참여중`}
       </Text>
       {!isFull ? (
         <Animated.View

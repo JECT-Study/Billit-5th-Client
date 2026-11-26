@@ -286,7 +286,7 @@ export function TripParticipantSheet({ tripId, onClose }: Props) {
                     </Text>
                   </View>
                   <TripInvitationStatus
-                    memberCapacity={trip.memberCapacity}
+                    registeredMemberCount={trip.registeredMemberCount}
                     isFull={emptyCount === 0}
                   />
                 </View>
