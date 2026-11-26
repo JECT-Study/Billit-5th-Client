@@ -150,7 +150,8 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
     if (
       distanceFromBottom < 200 &&
       tripListQuery.hasNextPage &&
-      !tripListQuery.isFetchingNextPage
+      !tripListQuery.isFetching &&
+      !tripListQuery.isShowingPreviousData
     ) {
       void tripListQuery.fetchNextPage();
     }
@@ -178,7 +179,7 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
           refreshControl={
             <RefreshControl
               refreshing={
-                listSession.isManualRefresh && tripListQuery.isPending
+                listSession.isManualRefresh && tripListQuery.isFetching
               }
               onRefresh={handlePullToRefresh}
             />
@@ -204,7 +205,11 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
         onScroll={handleScroll}
         refreshControl={
           <RefreshControl
-            refreshing={listSession.isManualRefresh && tripListQuery.isPending}
+            refreshing={
+              listSession.isManualRefresh &&
+              tripListQuery.isFetching &&
+              !tripListQuery.isFetchingNextPage
+            }
             onRefresh={handlePullToRefresh}
           />
         }

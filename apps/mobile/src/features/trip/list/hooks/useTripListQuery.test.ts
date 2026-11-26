@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useTripListQuery } from '@/features/trip/list/hooks/useTripListQuery';
 import { tripKeys } from '@/features/trip/tripKeys';
@@ -6,6 +6,7 @@ import { listTrips } from '@/features/trip/services/tripApi';
 
 jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),
+  useQueryClient: jest.fn(),
 }));
 
 jest.mock('@/features/trip/services/tripApi', () => ({
@@ -20,9 +21,19 @@ function getQueryOptions() {
 
 describe('useTripListQuery', () => {
   const today = '2026-11-24';
+  const findAll = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.mocked(useInfiniteQuery).mockReturnValue({
+      data: undefined,
+      isError: false,
+      isPlaceholderData: false,
+    } as never);
+    findAll.mockReturnValue([]);
+    jest.mocked(useQueryClient).mockReturnValue({
+      getQueryCache: () => ({ findAll }),
+    } as never);
   });
 
   it('전체 여행 목록을 첫 페이지부터 조회한다', async () => {
@@ -81,5 +92,47 @@ describe('useTripListQuery', () => {
     expect(tripKeys.list(today, 'ONGOING', 1)).not.toEqual(
       tripKeys.list(today, 'ONGOING', 2),
     );
+  });
+
+  it('같은 필터 재조회 중에는 이전 목록을 유지하고 다른 필터에서는 사용하지 않는다', () => {
+    useTripListQuery(today, 'UPCOMING', 2);
+    const placeholderData = getQueryOptions().placeholderData as (
+      data: unknown,
+      query: { queryKey: readonly unknown[] },
+    ) => unknown;
+    const previous = { pages: [{ data: ['이전 여행'] }], pageParams: [0] };
+
+    expect(
+      placeholderData(previous, {
+        queryKey: tripKeys.list(today, 'UPCOMING', 1),
+      }),
+    ).toBe(previous);
+    expect(
+      placeholderData(previous, { queryKey: tripKeys.list(today, 'ENDED', 1) }),
+    ).toBeUndefined();
+  });
+
+  it('재조회 실패 시 같은 필터의 가장 최근 목록을 유지한다', () => {
+    const previous = { pages: [{ data: ['이전 여행'] }], pageParams: [0] };
+    findAll.mockReturnValue([
+      {
+        queryKey: tripKeys.list(today, 'UPCOMING', 1),
+        state: { data: previous, dataUpdatedAt: 5 },
+      },
+      {
+        queryKey: tripKeys.list(today, 'ENDED', 1),
+        state: { data: { pages: [] }, dataUpdatedAt: 10 },
+      },
+    ]);
+    jest.mocked(useInfiniteQuery).mockReturnValue({
+      data: undefined,
+      isError: true,
+      isPlaceholderData: false,
+    } as never);
+
+    const result = useTripListQuery(today, 'UPCOMING', 2);
+
+    expect(result.data).toBe(previous);
+    expect(result.isShowingPreviousData).toBe(true);
   });
 });
