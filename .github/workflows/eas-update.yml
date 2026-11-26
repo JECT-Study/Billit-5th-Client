@@ -1,4 +1,5 @@
 # 모바일 앱(apps/mobile) OTA 업데이트. develop에 머지되면 preview 채널로 eas update를 실행함
+#  - 검사(ci.yml)를 먼저 돌리고, 통과해야 업데이트를 올림(cd.yml과 같은 방식)
 #  - 저장소 변수 EAS_UPDATE_ENABLED가 true일 때만 동작함(개발 서버 도메인이 나오기 전에는 건너뜀)
 #  - runtimeVersion이 fingerprint라 네이티브 설정이 바뀐 커밋의 업데이트는 기존 빌드에 적용되지 않음. 이때는 다시 빌드해야 함
 name: eas-update
@@ -12,7 +13,12 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.nvmrc'
+      # 검사 기준이 바뀌면 다시 검사하고 올림
+      - '.prettierrc.json'
+      - '.prettierignore'
+      - '.github/workflows/ci.yml'
       - '.github/workflows/eas-update.yml'
   workflow_dispatch:
 
@@ -24,9 +30,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check:
+    if: vars.EAS_UPDATE_ENABLED == 'true'
+    uses: ./.github/workflows/ci.yml
+
   update:
     name: eas update (preview)
-    if: vars.EAS_UPDATE_ENABLED == 'true'
+    # 검사가 실패하거나 건너뛰면 업데이트도 하지 않음
+    needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
