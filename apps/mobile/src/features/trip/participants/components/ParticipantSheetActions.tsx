@@ -59,7 +59,7 @@ export function ParticipantSheetActions({
           {emptyCount > 0 ? (
             <>
               <Text className="text-caption-1 text-center font-semibold text-black">
-                참여자가 가득 차면 여행을 시작할 수 있어요!
+                모두 참여하면 여행을 오픈할 수 있어요
               </Text>
               <View className="flex-row gap-12">
                 <Button
