@@ -9,10 +9,18 @@ import { COLORS, SHADOW, TEXT_COLORS } from '@/theme/theme.generated';
 // - primary: default, compact-primary
 // - secondary: secondary, compact-secondary
 // - black, error, light: 같은 이름의 variant
+// - tinted: 옅은 하늘색 배경의 보조 CTA (여행방 「정산하기」, 3394:93834)
 // - outline: icon (테두리 버튼)
 // - inline: inline, inline-icon (크기가 따로 정해져 있어 size를 쓰지 않음)
 export type ButtonVariant =
-  'primary' | 'secondary' | 'black' | 'error' | 'light' | 'outline' | 'inline';
+  | 'primary'
+  | 'secondary'
+  | 'black'
+  | 'error'
+  | 'light'
+  | 'tinted'
+  | 'outline'
+  | 'inline';
 
 export type ButtonSize = 'large' | 'compact';
 
@@ -54,7 +62,7 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     hasInnerGlow: false,
   },
   error: {
-    containerClassName: 'bg-red-alert',
+    containerClassName: 'bg-red-alert-dark',
     labelClassName: 'text-white',
     iconColor: COLORS.white,
     hasInnerGlow: true,
@@ -64,6 +72,12 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     labelClassName: 'text-secondary',
     iconColor: TEXT_COLORS.secondary,
     hasInnerGlow: false,
+  },
+  tinted: {
+    containerClassName: 'bg-sky-10',
+    labelClassName: 'text-action-primary-background',
+    iconColor: COLORS['action-primary-background'],
+    hasInnerGlow: true,
   },
   outline: {
     containerClassName: 'border border-gray-6',

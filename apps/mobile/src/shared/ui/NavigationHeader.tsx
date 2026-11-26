@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { CaretLeftMdIcon } from '@/shared/ui/icons';
@@ -7,12 +8,14 @@ type NavigationHeaderProps = {
   title: string;
   onPressBack: () => void;
   isBackDisabled?: boolean;
+  right?: ReactNode;
 };
 
 export function NavigationHeader({
   title,
   onPressBack,
   isBackDisabled = false,
+  right,
 }: NavigationHeaderProps) {
   function handlePressBack() {
     onPressBack();
@@ -37,7 +40,7 @@ export function NavigationHeader({
       >
         {title}
       </Text>
-      <View className="w-48" />
+      <View className="h-48 w-48 items-center justify-center">{right}</View>
     </View>
   );
 }
