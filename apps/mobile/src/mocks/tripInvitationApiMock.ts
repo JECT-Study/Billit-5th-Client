@@ -1,9 +1,4 @@
-import {
-  AxiosError,
-  type AxiosAdapter,
-  type AxiosResponse,
-  type InternalAxiosRequestConfig,
-} from 'axios';
+import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios';
 
 import type {
   TripInvitation,
@@ -11,6 +6,12 @@ import type {
   TripMembership,
 } from '@/features/trip/tripInvitationSchema';
 import { apiClient } from '@/lib/api';
+import {
+  parseRequestBody,
+  toApiError,
+  toNetworkError,
+  toResponse,
+} from '@/mocks/mockHttp';
 import { addMockTrip, findMockTrip } from '@/mocks/tripApiMock';
 
 type MockInvitationTrip = TripInvitationSearch & {
@@ -103,48 +104,6 @@ let nextTripMemberNumber = 1;
 const inviteCodesByTripId = new Map<string, string>();
 let nextInviteCodeNumber = 1;
 
-function toResponse<T>(
-  config: InternalAxiosRequestConfig,
-  data: T,
-  status = 200,
-): AxiosResponse<T> {
-  return {
-    config,
-    data,
-    headers: {},
-    request: {},
-    status,
-    statusText: status === 201 ? 'Created' : 'OK',
-  };
-}
-
-// 커스텀 adapter의 반환값은 상태 코드와 관계없이 성공으로 처리되므로 오류는 직접 던진다.
-function toApiError(
-  config: InternalAxiosRequestConfig,
-  status: number,
-  code: string,
-  message: string,
-) {
-  return new AxiosError(
-    message,
-    AxiosError.ERR_BAD_REQUEST,
-    config,
-    {},
-    {
-      config,
-      data: { code, message },
-      headers: {},
-      status,
-      statusText: '',
-    },
-  );
-}
-
-// 응답 없이 실패한 요청(네트워크 끊김)과 같은 모양의 오류
-function toNetworkError(config: InternalAxiosRequestConfig) {
-  return new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, {});
-}
-
 // 실패 흐름을 시뮬레이터에서 보기 위한 값
 const NETWORK_ERROR_CODE = 'NETERR';
 const SERVER_ERROR_CODE = 'ERR500';
@@ -170,12 +129,6 @@ function toSearchResult(trip: MockInvitationTrip): TripInvitationSearch {
     status: trip.status,
     isAlreadyJoined: trip.isAlreadyJoined,
   };
-}
-
-function toJoinRequest(data: unknown): JoinRequest {
-  return typeof data === 'string'
-    ? (JSON.parse(data) as JoinRequest)
-    : (data as JoinRequest);
 }
 
 function getInviteCode(tripId: string) {
@@ -243,7 +196,7 @@ const tripInvitationMockAdapter: AxiosAdapter = async (config) => {
   }
 
   // POST /api/v1/trip-memberships
-  const request = toJoinRequest(config.data);
+  const request = parseRequestBody<JoinRequest>(config.data);
   if (request.tripNickname === JOIN_FAILURE_NICKNAME)
     throw toNetworkError(config);
   const trip = findTripByCode(request.inviteCode);

@@ -7,10 +7,13 @@ import { mobileTokenStorage } from '@/lib/tokenStorage';
 
 import {
   createTrip,
+  deleteTrip,
+  getTrip,
   getTripInvitation,
   joinTripByInviteCode,
   listTrips,
   searchTripInvitation,
+  updateTrip,
 } from '@/features/trip/services/tripApi';
 import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
 
@@ -359,6 +362,132 @@ describe('trip invitation api', () => {
         joinTripByInviteCode({ inviteCode: 'A7K2PQ', tripNickname: '지훈' }),
         { status: 409, code },
       );
+    });
+  });
+});
+
+describe('trip detail api', () => {
+  const tripUrl = `${apiBaseUrl}/api/v1/trips/trip-1`;
+  const tripDetail = {
+    ...trip,
+    participants: [
+      {
+        tripMemberId: 'member-1',
+        memberId: 'user-1',
+        tripNickname: '민서',
+        role: 'ADMIN',
+        participantStatus: 'MEMBER',
+        shareAmountKrw: '0.00',
+      },
+    ],
+  };
+
+  describe('getTrip', () => {
+    it('여행 상세를 조회한다', async () => {
+      let receivedAuthorization: string | null = null;
+
+      server.use(
+        http.get(tripUrl, ({ request: incoming }) => {
+          receivedAuthorization = incoming.headers.get('Authorization');
+          return HttpResponse.json({ data: tripDetail });
+        }),
+      );
+
+      await expect(getTrip('trip-1')).resolves.toEqual(tripDetail);
+      expect(receivedAuthorization).toBe('Bearer member-token');
+    });
+
+    it('tripId를 경로에 맞게 인코딩한다', async () => {
+      let receivedPath: string | undefined;
+
+      server.use(
+        http.get(
+          `${apiBaseUrl}/api/v1/trips/:tripId`,
+          ({ request: incoming }) => {
+            receivedPath = new URL(incoming.url).pathname;
+            return HttpResponse.json({ data: tripDetail });
+          },
+        ),
+      );
+
+      await getTrip('trip/1');
+      expect(receivedPath).toBe('/api/v1/trips/trip%2F1');
+    });
+
+    it('명세와 다른 응답은 반환하지 않는다', async () => {
+      server.use(http.get(tripUrl, () => HttpResponse.json({ data: trip })));
+
+      await expect(getTrip('trip-1')).rejects.toThrow();
+    });
+
+    it('나간 여행이면 403 오류를 전달한다', async () => {
+      server.use(
+        http.get(tripUrl, () => errorResponse(403, 'COMMON_FORBIDDEN')),
+      );
+
+      await expectApiError(getTrip('trip-1'), {
+        status: 403,
+        code: 'COMMON_FORBIDDEN',
+      });
+    });
+  });
+
+  describe('updateTrip', () => {
+    it('바꿀 필드만 PATCH로 보내고 응답을 파싱한다', async () => {
+      let receivedBody: unknown;
+      const updated = { ...trip, name: '오사카 여행' };
+
+      server.use(
+        http.patch(tripUrl, async ({ request: incoming }) => {
+          receivedBody = await incoming.json();
+          return HttpResponse.json({ data: updated });
+        }),
+      );
+
+      await expect(
+        updateTrip({ tripId: 'trip-1', request: { name: '오사카 여행' } }),
+      ).resolves.toEqual(updated);
+      expect(receivedBody).toEqual({ name: '오사카 여행' });
+    });
+
+    it('인원 변경 불가 409 오류를 전달한다', async () => {
+      server.use(
+        http.patch(tripUrl, () =>
+          errorResponse(409, 'TRIP_CAPACITY_CHANGE_NOT_ALLOWED'),
+        ),
+      );
+
+      await expectApiError(
+        updateTrip({ tripId: 'trip-1', request: { memberCapacity: 1 } }),
+        { status: 409, code: 'TRIP_CAPACITY_CHANGE_NOT_ALLOWED' },
+      );
+    });
+  });
+
+  describe('deleteTrip', () => {
+    it('DELETE를 보내고 204 응답을 받는다', async () => {
+      let isCalled = false;
+
+      server.use(
+        http.delete(tripUrl, () => {
+          isCalled = true;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+
+      await expect(deleteTrip('trip-1')).resolves.toBeUndefined();
+      expect(isCalled).toBe(true);
+    });
+
+    it('기록이 있는 여행이면 409 오류를 전달한다', async () => {
+      server.use(
+        http.delete(tripUrl, () => errorResponse(409, 'TRIP_RECORDS_EXIST')),
+      );
+
+      await expectApiError(deleteTrip('trip-1'), {
+        status: 409,
+        code: 'TRIP_RECORDS_EXIST',
+      });
     });
   });
 });

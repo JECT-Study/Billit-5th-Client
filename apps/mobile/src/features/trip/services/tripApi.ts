@@ -1,6 +1,11 @@
 import { apiClient } from '@/lib/api';
 
 import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
+import type { UpdateTripRequest } from '@/features/trip/services/tripUpdateRequest';
+import {
+  tripDetailSchema,
+  type TripDetail,
+} from '@/features/trip/tripDetailSchema';
 import {
   tripSummarySchema,
   type TripSummary,
@@ -22,6 +27,11 @@ import {
 type CreateTripVariables = {
   request: CreateTripRequest;
   idempotencyKey: string;
+};
+
+type UpdateTripVariables = {
+  tripId: string;
+  request: UpdateTripRequest;
 };
 
 type ListTripsParams = {
@@ -68,11 +78,36 @@ export async function listTrips({
   return tripListResponseSchema.parse(response.data);
 }
 
+function getTripPath(tripId: string) {
+  return `${tripPath}/${encodeURIComponent(tripId)}`;
+}
+
+export async function getTrip(tripId: string): Promise<TripDetail> {
+  const response = await apiClient.get<{ data: unknown }>(getTripPath(tripId));
+  return tripDetailSchema.parse(response.data.data);
+}
+
+export async function updateTrip({
+  tripId,
+  request,
+}: UpdateTripVariables): Promise<TripSummary> {
+  const response = await apiClient.patch<{ data: unknown }>(
+    getTripPath(tripId),
+    request,
+  );
+  return tripSummarySchema.parse(response.data.data);
+}
+
+// 성공하면 204로 본문이 없다.
+export async function deleteTrip(tripId: string): Promise<void> {
+  await apiClient.delete(getTripPath(tripId));
+}
+
 export async function getTripInvitation(
   tripId: string,
 ): Promise<TripInvitation> {
   const response = await apiClient.get<{ data: unknown }>(
-    `${tripPath}/${encodeURIComponent(tripId)}/invitation`,
+    `${getTripPath(tripId)}/invitation`,
   );
   return tripInvitationSchema.parse(response.data.data);
 }

@@ -57,7 +57,7 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     containerClassName: 'bg-red-alert',
     labelClassName: 'text-white',
     iconColor: COLORS.white,
-    hasInnerGlow: false,
+    hasInnerGlow: true,
   },
   light: {
     containerClassName: '',

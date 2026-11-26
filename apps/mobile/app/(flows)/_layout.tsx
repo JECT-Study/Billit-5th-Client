@@ -5,6 +5,7 @@ export default function FlowLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="trips/new" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="trips/[tripId]/settings" />
     </Stack>
   );
 }
