@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api';
 
-import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
-import type { UpdateTripRequest } from '@/features/trip/services/tripUpdateRequest';
+import type { CreateTripRequest } from '@/features/trip/creation/services/tripCreationRequest';
+import type { UpdateTripRequest } from '@/features/trip/settings/services/tripUpdateRequest';
 import {
   tripDetailSchema,
   type TripDetail,
@@ -14,7 +14,7 @@ import {
   tripListResponseSchema,
   type TripListFilter,
   type TripListResponse,
-} from '@/features/trip/tripListSchema';
+} from '@/features/trip/list/tripListSchema';
 import {
   tripInvitationSchema,
   tripInvitationSearchSchema,
@@ -22,7 +22,7 @@ import {
   type TripInvitation,
   type TripInvitationSearch,
   type TripMembership,
-} from '@/features/trip/tripInvitationSchema';
+} from '@/features/trip/invitation/tripInvitationSchema';
 
 type CreateTripVariables = {
   request: CreateTripRequest;

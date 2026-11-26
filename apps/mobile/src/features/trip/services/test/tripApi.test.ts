@@ -15,7 +15,7 @@ import {
   searchTripInvitation,
   updateTrip,
 } from '@/features/trip/services/tripApi';
-import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
+import type { CreateTripRequest } from '@/features/trip/creation/services/tripCreationRequest';
 
 jest.mock('@/lib/tokenStorage', () => ({
   mobileTokenStorage: {

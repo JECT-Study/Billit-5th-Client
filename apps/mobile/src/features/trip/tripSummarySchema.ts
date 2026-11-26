@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   TRIP_COUNTRY_CODES,
   TRIP_CURRENCY_CODES,
-} from '@/features/trip/tripCreationForm';
+} from '@/features/trip/shared/tripCreationForm';
 
 // POST /api/v1/trips 응답의 data(TripSummaryResponse)
 export const tripSummarySchema = z.object({
