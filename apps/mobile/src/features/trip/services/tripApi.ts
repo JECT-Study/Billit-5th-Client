@@ -3,7 +3,9 @@ import { apiClient } from '@/lib/api';
 import type { CreateTripRequest } from '@/features/trip/creation/services/tripCreationRequest';
 import type { UpdateTripRequest } from '@/features/trip/settings/services/tripUpdateRequest';
 import {
+  tripConfirmationSchema,
   tripDetailSchema,
+  tripGuestSchema,
   type TripDetail,
 } from '@/features/trip/tripDetailSchema';
 import {
@@ -49,6 +51,34 @@ type JoinTripByInviteCodeVariables = {
 const tripPath = '/api/v1/trips';
 const tripInvitationPath = '/api/v1/trip-invitations';
 const tripMembershipPath = '/api/v1/trip-memberships';
+
+export async function saveTripGuest(
+  tripId: string,
+  tripNickname: string,
+  tripMemberId?: string,
+) {
+  const path = `${getTripPath(tripId)}/guests`;
+  const response = tripMemberId
+    ? await apiClient.patch<{ data: unknown }>(
+        `${path}/${encodeURIComponent(tripMemberId)}`,
+        { tripNickname },
+      )
+    : await apiClient.post<{ data: unknown }>(path, { tripNickname });
+  return tripGuestSchema.parse(response.data.data);
+}
+
+export async function deleteTripGuest(tripId: string, tripMemberId: string) {
+  await apiClient.delete(
+    `${getTripPath(tripId)}/guests/${encodeURIComponent(tripMemberId)}`,
+  );
+}
+
+export async function confirmTrip(tripId: string) {
+  const response = await apiClient.post<{ data: unknown }>(
+    `${getTripPath(tripId)}/confirm`,
+  );
+  return tripConfirmationSchema.parse(response.data.data);
+}
 
 export async function createTrip({
   request,
