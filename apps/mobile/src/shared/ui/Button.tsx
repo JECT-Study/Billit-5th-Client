@@ -9,10 +9,18 @@ import { COLORS, SHADOW, TEXT_COLORS } from '@/theme/theme.generated';
 // - primary: default, compact-primary
 // - secondary: secondary, compact-secondary
 // - black, error, light: 같은 이름의 variant
+// - subtle: 연한 회색 배경 CTA
 // - outline: icon (테두리 버튼)
 // - inline: inline, inline-icon (크기가 따로 정해져 있어 size를 쓰지 않음)
 export type ButtonVariant =
-  'primary' | 'secondary' | 'black' | 'error' | 'light' | 'outline' | 'inline';
+  | 'primary'
+  | 'secondary'
+  | 'black'
+  | 'error'
+  | 'light'
+  | 'subtle'
+  | 'outline'
+  | 'inline';
 
 export type ButtonSize = 'large' | 'compact';
 
@@ -54,13 +62,19 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     hasInnerGlow: false,
   },
   error: {
-    containerClassName: 'bg-red-alert',
+    containerClassName: 'bg-red-alert-dark',
     labelClassName: 'text-white',
     iconColor: COLORS.white,
     hasInnerGlow: true,
   },
   light: {
     containerClassName: '',
+    labelClassName: 'text-secondary',
+    iconColor: TEXT_COLORS.secondary,
+    hasInnerGlow: false,
+  },
+  subtle: {
+    containerClassName: 'bg-gray-1',
     labelClassName: 'text-secondary',
     iconColor: TEXT_COLORS.secondary,
     hasInnerGlow: false,
@@ -87,8 +101,8 @@ const SIZE_CLASS_NAMES: Record<
   { container: string; label: string }
 > = {
   large: {
-    container: 'h-58 rounded-14 gap-10 px-10',
-    label: 'text-headline-1',
+    container: 'h-[56px] rounded-14 gap-10 px-10',
+    label: 'text-body-1',
   },
   compact: {
     container: 'h-[52px] rounded-14 gap-10 px-10',
