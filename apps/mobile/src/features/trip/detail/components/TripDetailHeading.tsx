@@ -18,7 +18,7 @@ export function TripDetailHeading({ trip }: TripDetailHeadingProps) {
       >
         {trip.name}
       </Text>
-      <Text className="text-caption-1 mt-[2px] font-semibold text-black">
+      <Text className="text-caption-1 mt-2 font-semibold text-black">
         {formatTripDateRange(trip.startDate, trip.endDate)}
       </Text>
     </View>

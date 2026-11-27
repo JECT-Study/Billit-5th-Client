@@ -33,9 +33,6 @@ import { MoreIcon } from '@/shared/ui/icons';
 import { Text } from '@/shared/ui/Text';
 import { COLORS } from '@/theme/theme.generated';
 
-// 토큰에 없는 빈 상태 화면 배경 끝 색 (Figma: 여행방 없음, 3037:54776)
-const EMPTY_STATE_GRADIENT_END_COLOR = '#CEEEFF';
-
 let nextListSession = 0;
 
 type Props = { onOpenParticipantSheet: (tripId: string) => void };
@@ -187,7 +184,8 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
   if (isEmpty && filter === undefined) {
     return (
       <SafeAreaView edges={['top', 'left', 'right']} className="flex-1">
-        <GradientBackground endColor={EMPTY_STATE_GRADIENT_END_COLOR} />
+        {/* Figma: 여행방 없음 (3037:54776) */}
+        <GradientBackground endColor={COLORS['sky-gradient-end']} />
         <TripHomeHeader onPressNotification={handlePressNotification} />
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -277,7 +275,7 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
           </View>
         </View>
 
-        <View className="gap-[2px] px-24 pt-8">
+        <View className="gap-2 px-24 pt-8">
           {trips.map((trip) => (
             <TripListItem
               key={trip.tripId}

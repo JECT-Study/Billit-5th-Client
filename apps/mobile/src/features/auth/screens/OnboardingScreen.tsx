@@ -83,7 +83,7 @@ export function OnboardingScreen() {
         accessibilityRole="button"
         accessibilityLabel="다음 단계"
         onPress={handlePressBody}
-        className="flex-1 px-24 pt-[26px]"
+        className="pt-26 flex-1 px-24"
       >
         <OnboardingTitle title={step.title} />
         <View

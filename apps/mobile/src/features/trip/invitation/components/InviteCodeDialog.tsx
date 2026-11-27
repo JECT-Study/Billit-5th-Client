@@ -21,9 +21,6 @@ import { Text } from '@/shared/ui/Text';
 import { Toast } from '@/shared/ui/Toast';
 import { COLORS, FONT_SIZE, TEXT_COLORS } from '@/theme/theme.generated';
 
-// TODO: Figma의 error_bg가 토큰 내보내기 대상이 아닌 "변수 컬렉션"에 있어 tokens.json에 없다.
-// Figma에서 BILLIT · Color / Primitive v2로 옮기면 토큰을 다시 추출(pnpm tokens:build)하고 이 상수를 토큰으로 바꾼다.
-const UNAVAILABLE_CARD_BACKGROUND = '#FFE7E8';
 const NOT_FOUND_MESSAGE = '검색 결과가 없어요.';
 const SEARCH_FAILED_MESSAGE = '검색하지 못했어요. 다시 시도해주세요.';
 const ALREADY_JOINED_MESSAGE = '이미 참여중인 여행방입니다.';
@@ -274,9 +271,7 @@ function InviteCodeResultCard({
     <View
       className={`rounded-12 px-18 gap-[3px] py-10 ${isJoinable ? 'bg-sky-10' : ''}`}
       style={
-        isJoinable
-          ? undefined
-          : { backgroundColor: UNAVAILABLE_CARD_BACKGROUND }
+        isJoinable ? undefined : { backgroundColor: COLORS['surface-error'] }
       }
     >
       <View className="flex-row items-start justify-between gap-8">

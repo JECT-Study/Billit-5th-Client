@@ -49,7 +49,7 @@ export function TripShareSummary({ participants }: TripShareSummaryProps) {
       >
         <View className="flex-1 flex-row items-center gap-10">
           <CoinBagSvg width={28} height={28} />
-          <View className="flex-1 gap-[2px]">
+          <View className="flex-1 gap-2">
             <Text className="text-body-1 font-medium text-black">
               누적 정산금
             </Text>
