@@ -9,6 +9,7 @@ import { COLORS, SHADOW, TEXT_COLORS } from '@/theme/theme.generated';
 // - primary: default, compact-primary
 // - secondary: secondary, compact-secondary
 // - black, error, light: 같은 이름의 variant
+// - subtle: 연한 회색 배경 CTA
 // - tinted: 옅은 하늘색 배경의 보조 CTA (여행방 「정산하기」, 3394:93834)
 // - outline: icon (테두리 버튼)
 // - inline: inline, inline-icon (크기가 따로 정해져 있어 size를 쓰지 않음)
@@ -18,6 +19,7 @@ export type ButtonVariant =
   | 'black'
   | 'error'
   | 'light'
+  | 'subtle'
   | 'tinted'
   | 'outline'
   | 'inline';
@@ -73,6 +75,12 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     iconColor: TEXT_COLORS.secondary,
     hasInnerGlow: false,
   },
+  subtle: {
+    containerClassName: 'bg-gray-1',
+    labelClassName: 'text-secondary',
+    iconColor: TEXT_COLORS.secondary,
+    hasInnerGlow: false,
+  },
   tinted: {
     containerClassName: 'bg-sky-10',
     labelClassName: 'text-action-primary-background',
@@ -101,8 +109,8 @@ const SIZE_CLASS_NAMES: Record<
   { container: string; label: string }
 > = {
   large: {
-    container: 'h-58 rounded-14 gap-10 px-10',
-    label: 'text-headline-1',
+    container: 'h-[56px] rounded-14 gap-10 px-10',
+    label: 'text-body-1',
   },
   compact: {
     container: 'h-[52px] rounded-14 gap-10 px-10',

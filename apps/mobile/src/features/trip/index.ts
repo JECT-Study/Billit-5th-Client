@@ -1,7 +1,7 @@
-export { TripCreateScreen } from './screens/TripCreateScreen';
-export { TripCreateCompleteScreen } from './screens/TripCreateCompleteScreen';
-export { TripDetailScreen } from './screens/TripDetailScreen';
-export { TripJoinScreen } from './screens/TripJoinScreen';
-export { TripManageScreen } from './screens/TripManageScreen';
-export { TripScreen } from './screens/TripScreen';
-export { TripSettingsScreen } from './screens/TripSettingsScreen';
+export { TripCreateScreen } from './creation/screens/TripCreateScreen';
+export { TripCreateCompleteScreen } from './creation/screens/TripCreateCompleteScreen';
+export { TripDetailScreen } from './detail/screens/TripDetailScreen';
+export { TripJoinScreen } from './invitation/screens/TripJoinScreen';
+export { TripManageScreen } from './list/screens/TripManageScreen';
+export { TripScreen } from './list/screens/TripScreen';
+export { TripSettingsScreen } from './settings/screens/TripSettingsScreen';

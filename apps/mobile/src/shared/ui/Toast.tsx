@@ -10,6 +10,7 @@ type ToastProps = {
   message: string;
   onDismiss: () => void;
   durationMs?: number;
+  backgroundColor?: string;
 };
 
 export const DEFAULT_TOAST_DURATION_MS = 2000;
@@ -23,6 +24,7 @@ export function Toast({
   message,
   onDismiss,
   durationMs = DEFAULT_TOAST_DURATION_MS,
+  backgroundColor,
 }: ToastProps) {
   const insets = useSafeAreaInsets();
   const onDismissRef = useRef(onDismiss);
@@ -49,6 +51,7 @@ export function Toast({
         accessibilityRole="alert"
         accessibilityLiveRegion="polite"
         className="bg-gray-1 rounded-12 min-h-[46px] flex-row items-center gap-6 p-10"
+        style={backgroundColor ? { backgroundColor } : undefined}
       >
         <InfoIcon color={COLORS['red-alert-dark']} />
         <Text

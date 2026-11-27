@@ -9,13 +9,16 @@ import {
   createTrip,
   deleteTrip,
   getTrip,
+  confirmTrip,
+  deleteTripGuest,
   getTripInvitation,
   joinTripByInviteCode,
   listTrips,
   searchTripInvitation,
   updateTrip,
+  saveTripGuest,
 } from '@/features/trip/services/tripApi';
-import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
+import type { CreateTripRequest } from '@/features/trip/creation/services/tripCreationRequest';
 
 jest.mock('@/lib/tokenStorage', () => ({
   mobileTokenStorage: {
@@ -84,6 +87,96 @@ afterAll(() => server.close());
 beforeEach(() => {
   jest.mocked(mobileTokenStorage.getToken).mockResolvedValue('member-token');
 });
+
+it('여행 상세에서 참여자 목록을 파싱한다', async () => {
+  const participant = {
+    tripMemberId: '7',
+    memberId: null,
+    tripNickname: '서연',
+    role: 'MEMBER',
+    participantStatus: 'GUEST',
+    shareAmountKrw: '0.00',
+  };
+  server.use(
+    http.get(`${tripListUrl}/123`, () =>
+      HttpResponse.json({
+        data: { ...trip, tripId: '123', participants: [participant] },
+      }),
+    ),
+  );
+  await expect(getTrip('123')).resolves.toMatchObject({
+    participants: [participant],
+  });
+});
+
+it('비로그인 참여자 등록·수정·삭제 요청을 명세에 맞게 보낸다', async () => {
+  const bodies: unknown[] = [];
+  server.use(
+    http.post(`${tripListUrl}/123/guests`, async ({ request: incoming }) => {
+      bodies.push(await incoming.json());
+      return HttpResponse.json(
+        { data: { tripMemberId: '7', tripNickname: '서연' } },
+        { status: 201 },
+      );
+    }),
+    http.patch(`${tripListUrl}/123/guests/7`, async ({ request: incoming }) => {
+      bodies.push(await incoming.json());
+      return HttpResponse.json({
+        data: { tripMemberId: '7', tripNickname: '지훈' },
+      });
+    }),
+    http.delete(
+      `${tripListUrl}/123/guests/7`,
+      () => new HttpResponse(null, { status: 204 }),
+    ),
+  );
+  await expect(saveTripGuest('123', '서연')).resolves.toEqual({
+    tripMemberId: '7',
+    tripNickname: '서연',
+  });
+  await expect(saveTripGuest('123', '지훈', '7')).resolves.toEqual({
+    tripMemberId: '7',
+    tripNickname: '지훈',
+  });
+  await expect(deleteTripGuest('123', '7')).resolves.toBeUndefined();
+  expect(bodies).toEqual([{ tripNickname: '서연' }, { tripNickname: '지훈' }]);
+});
+
+it('빈자리가 있어 확정되지 않은 200 응답도 상태 그대로 반환한다', async () => {
+  server.use(
+    http.post(`${tripListUrl}/123/confirm`, () =>
+      HttpResponse.json({ data: { tripId: '123', status: 'UNCONFIRMED' } }),
+    ),
+  );
+  await expect(confirmTrip('123')).resolves.toEqual({
+    tripId: '123',
+    status: 'UNCONFIRMED',
+  });
+});
+
+it.each(['등록', '수정'])(
+  '비로그인 참여자 %s 시 닉네임 중복 오류를 전달한다',
+  async (action) => {
+    const response = () =>
+      HttpResponse.json(
+        { code: 'TRIP_NICKNAME_DUPLICATED', message: '중복된 이름입니다.' },
+        { status: 409 },
+      );
+    server.use(
+      http.post(`${tripListUrl}/123/guests`, response),
+      http.patch(`${tripListUrl}/123/guests/7`, response),
+    );
+    try {
+      await saveTripGuest('123', '서연', action === '수정' ? '7' : undefined);
+      throw new Error('중복 오류가 발생해야 합니다.');
+    } catch (error) {
+      expect(parseApiError(error)).toMatchObject({
+        status: 409,
+        code: 'TRIP_NICKNAME_DUPLICATED',
+      });
+    }
+  },
+);
 
 it('요청 본문과 인증·멱등성 헤더를 보내고 201 응답을 파싱한다', async () => {
   let receivedBody: unknown;
