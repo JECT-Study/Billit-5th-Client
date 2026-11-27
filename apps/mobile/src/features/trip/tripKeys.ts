@@ -1,4 +1,4 @@
-import type { TripListFilter } from '@/features/trip/tripListSchema';
+import type { TripListFilter } from '@/features/trip/list/tripListSchema';
 
 export const tripKeys = {
   all: ['trips'] as const,

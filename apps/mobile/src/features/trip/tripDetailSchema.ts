@@ -26,3 +26,13 @@ export const tripDetailSchema = tripSummarySchema.extend({
 export type ParticipantStatus = z.infer<typeof participantStatusSchema>;
 export type Participant = z.infer<typeof participantSchema>;
 export type TripDetail = z.infer<typeof tripDetailSchema>;
+
+export const tripGuestSchema = z.object({
+  tripMemberId: z.string(),
+  tripNickname: z.string(),
+});
+
+export const tripConfirmationSchema = z.object({
+  tripId: z.string(),
+  status: z.enum(['UNCONFIRMED', 'CONFIRMED']),
+});

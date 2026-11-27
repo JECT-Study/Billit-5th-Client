@@ -18,6 +18,7 @@ type TextFieldProps = {
   // 문구 없이 테두리만 에러 색으로 (예: 비어 있는 필수 입력)
   hasError?: boolean;
   autoFocus?: boolean;
+  showLabel?: boolean;
 };
 
 // Figma: Field/Text (3037:66827) = 라벨 + Input / State=input, Type=default (2260:17258) + 안내·에러 문구
@@ -32,6 +33,7 @@ export function TextField({
   errorMessage,
   hasError = false,
   autoFocus = false,
+  showLabel = true,
 }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const isErrorShown = hasError || errorMessage !== undefined;
@@ -51,7 +53,11 @@ export function TextField({
   return (
     <View className="gap-12">
       <View className="gap-10">
-        <Text className="text-secondary text-label-1 font-medium">{label}</Text>
+        {showLabel ? (
+          <Text className="text-secondary text-label-1 font-medium">
+            {label}
+          </Text>
+        ) : null}
         <View
           className="rounded-12 px-18 bg-surface-default h-48 flex-row items-center border"
           style={{

@@ -4,14 +4,14 @@ import type {
   TripListFilter,
   TripListItem,
   TripScheduleStatus,
-} from '@/features/trip/tripListSchema';
-import type { CreateTripRequest } from '@/features/trip/services/tripCreationRequest';
-import type { UpdateTripRequest } from '@/features/trip/services/tripUpdateRequest';
+} from '@/features/trip/list/tripListSchema';
+import type { CreateTripRequest } from '@/features/trip/creation/services/tripCreationRequest';
+import type { UpdateTripRequest } from '@/features/trip/settings/services/tripUpdateRequest';
 import {
   TRIP_COUNTRIES,
   type TripCountryCode,
   type TripCurrency,
-} from '@/features/trip/tripCreationForm';
+} from '@/features/trip/shared/tripCreationForm';
 import type { Participant, TripDetail } from '@/features/trip/tripDetailSchema';
 import type { TripSummary } from '@/features/trip/tripSummarySchema';
 import { apiClient } from '@/lib/api';

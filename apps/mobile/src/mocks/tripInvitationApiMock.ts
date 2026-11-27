@@ -4,7 +4,7 @@ import type {
   TripInvitation,
   TripInvitationSearch,
   TripMembership,
-} from '@/features/trip/tripInvitationSchema';
+} from '@/features/trip/invitation/tripInvitationSchema';
 import { apiClient } from '@/lib/api';
 import {
   parseRequestBody,

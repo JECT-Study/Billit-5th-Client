@@ -9,7 +9,7 @@ import { StepIndicator } from '@/shared/ui/StepIndicator';
 import { Text } from '@/shared/ui/Text';
 
 import { OnboardingTitle } from '@/features/auth/components/OnboardingTitle';
-import { TRIPS_AFTER_SIGNUP_HREF } from '@/features/trip/hooks/useInviteCodeDialogOnSignup';
+import { TRIPS_AFTER_SIGNUP_HREF } from '@/features/trip/invitation/hooks/useInviteCodeDialogOnSignup';
 
 // Figma 화면 배경: 위쪽 흰색 → 아래쪽 #F1FAFF
 const SCREEN_BACKGROUND = 'linear-gradient(167deg, #FFFFFF 30%, #F1FAFF 100%)';
