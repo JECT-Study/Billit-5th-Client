@@ -86,9 +86,7 @@ function TripDetailPlaceholder({ notice }: TripDetailPlaceholderProps) {
       className="bg-surface-default flex-1"
     >
       <TripDetailBackground />
-      <View className="px-24">
-        <NavigationHeader title={TITLE} onPressBack={handlePressBack} />
-      </View>
+      <NavigationHeader title={TITLE} onPressBack={handlePressBack} />
       {notice ? (
         <Toast message={notice.message} onDismiss={handleDismissNotice} />
       ) : (
@@ -156,13 +154,11 @@ function TripDetailContent({ trip }: TripDetailContentProps) {
       className="bg-surface-default flex-1"
     >
       <TripDetailBackground />
-      <View className="px-24">
-        <NavigationHeader
-          title={TITLE}
-          onPressBack={handlePressBack}
-          right={settingsButton}
-        />
-      </View>
+      <NavigationHeader
+        title={TITLE}
+        onPressBack={handlePressBack}
+        right={settingsButton}
+      />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
