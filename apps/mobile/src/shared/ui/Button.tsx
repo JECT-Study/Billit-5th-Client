@@ -10,7 +10,7 @@ import { COLORS, SHADOW, TEXT_COLORS } from '@/theme/theme.generated';
 // - secondary: secondary, compact-secondary
 // - black, error, light: 같은 이름의 variant
 // - subtle: 연한 회색 배경 CTA
-// - tinted: 옅은 하늘색 배경의 보조 CTA (여행방 「정산하기」, 3394:93834)
+// - blue: 같은 이름의 variant (3225:69496). 옅은 하늘색 배경, 글자는 Medium
 // - outline: icon (테두리 버튼)
 // - inline: inline, inline-icon (크기가 따로 정해져 있어 size를 쓰지 않음)
 export type ButtonVariant =
@@ -20,7 +20,7 @@ export type ButtonVariant =
   | 'error'
   | 'light'
   | 'subtle'
-  | 'tinted'
+  | 'blue'
   | 'outline'
   | 'inline';
 
@@ -42,6 +42,8 @@ type VariantStyle = {
   labelClassName: string;
   iconColor: string;
   hasInnerGlow: boolean;
+  // 없으면 font-semibold
+  fontClassName?: string;
 };
 
 const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
@@ -81,11 +83,12 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     iconColor: TEXT_COLORS.secondary,
     hasInnerGlow: false,
   },
-  tinted: {
+  blue: {
     containerClassName: 'bg-sky-10',
-    labelClassName: 'text-action-primary-background',
-    iconColor: COLORS['action-primary-background'],
+    labelClassName: 'text-sky-60',
+    iconColor: COLORS['sky-60'],
     hasInnerGlow: true,
+    fontClassName: 'font-medium',
   },
   outline: {
     containerClassName: 'border border-gray-6',
@@ -174,7 +177,7 @@ export function Button({
       }
     >
       <Text
-        className={`${sizeClassNames.label} ${labelColorClassName} font-semibold`}
+        className={`${sizeClassNames.label} ${labelColorClassName} ${variantStyle.fontClassName ?? 'font-semibold'}`}
       >
         {label}
       </Text>

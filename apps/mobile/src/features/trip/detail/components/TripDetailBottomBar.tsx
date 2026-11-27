@@ -64,7 +64,7 @@ export function TripDetailBottomBar({
         {isSettlementVisible ? (
           <Button
             label="정산하기"
-            variant="tinted"
+            variant="blue"
             onPress={handlePressSettlement}
             className="flex-1"
           />

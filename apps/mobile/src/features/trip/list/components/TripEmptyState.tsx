@@ -28,7 +28,7 @@ export function TripEmptyState({
       <View className="mt-[73px] gap-10">
         <Button label="첫 여행방 만들기" onPress={handlePressCreateTrip} />
         <Button
-          variant="light"
+          variant="blue"
           label="초대코드로 참여하기"
           onPress={handlePressJoinWithInviteCode}
         />
