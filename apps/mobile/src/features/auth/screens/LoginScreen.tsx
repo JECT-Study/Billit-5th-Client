@@ -18,17 +18,14 @@ import {
   type SocialProvider,
 } from '@/features/auth/services/socialSignIn';
 
-// Figma 로컬 페인트 스타일 "bg" (white → #CEEEFF, 위에서 아래로). 아직 토큰으로 등록되지 않은 값임
-const BACKGROUND_GRADIENT_END = '#CEEEFF';
-
 const SOCIAL_LOGIN_OPTIONS = [
   {
     id: 'GOOGLE',
     label: '구글로 계속하기',
     logo: require('@/assets/images/login/google.png') as ImageSource,
     logoSize: 20,
-    buttonClassName: 'border border-default bg-surface-default',
-    textClassName: 'text-strong',
+    buttonClassName: 'bg-white',
+    textClassName: 'text-black',
   },
   {
     id: 'APPLE',
@@ -119,6 +116,7 @@ export function LoginScreen() {
   );
 }
 
+// Figma 로컬 페인트 스타일 "bg" (white → sky-gradient-end, 위에서 아래로)
 function BackgroundGradient() {
   return (
     <View className="absolute inset-0" pointerEvents="none">
@@ -126,7 +124,7 @@ function BackgroundGradient() {
         <Defs>
           <LinearGradient id="loginBackground" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={COLORS.white} />
-            <Stop offset="1" stopColor={BACKGROUND_GRADIENT_END} />
+            <Stop offset="1" stopColor={COLORS['sky-gradient-end']} />
           </LinearGradient>
         </Defs>
         <Rect width="100%" height="100%" fill="url(#loginBackground)" />
@@ -168,7 +166,7 @@ function SocialLoginButton({
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={handlePress}
-        className={`rounded-12 flex-row items-center gap-10 px-10 py-12 ${buttonClassName} ${disabled ? 'opacity-50' : ''}`}
+        className={`rounded-12 h-[50px] flex-row items-center gap-10 p-10 ${buttonClassName} ${disabled ? 'opacity-50' : ''}`}
       >
         <View className="h-24 w-24 items-center justify-center">
           <Image
@@ -179,7 +177,7 @@ function SocialLoginButton({
           />
         </View>
         <Text
-          className={`text-headline-1 flex-1 text-center font-semibold ${textClassName}`}
+          className={`text-body-1 flex-1 text-center font-medium ${textClassName}`}
         >
           {label}
         </Text>

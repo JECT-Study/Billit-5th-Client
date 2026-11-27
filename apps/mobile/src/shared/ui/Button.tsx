@@ -8,8 +8,7 @@ import { COLORS, SHADOW, TEXT_COLORS } from '@/theme/theme.generated';
 // Figma: Button / CTA (2260:17365)
 // - primary: default, compact-primary
 // - secondary: secondary, compact-secondary
-// - black, error, light: 같은 이름의 variant
-// - subtle: 연한 회색 배경 CTA
+// - black, error, light: 같은 이름의 variant (light: 연한 회색 배경)
 // - blue: 같은 이름의 variant (3225:69496). 옅은 하늘색 배경, 글자는 Medium
 // - outline: icon (테두리 버튼)
 // - inline: inline, inline-icon (크기가 따로 정해져 있어 size를 쓰지 않음)
@@ -19,7 +18,6 @@ export type ButtonVariant =
   | 'black'
   | 'error'
   | 'light'
-  | 'subtle'
   | 'blue'
   | 'outline'
   | 'inline';
@@ -72,12 +70,6 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantStyle> = {
     hasInnerGlow: true,
   },
   light: {
-    containerClassName: '',
-    labelClassName: 'text-secondary',
-    iconColor: TEXT_COLORS.secondary,
-    hasInnerGlow: false,
-  },
-  subtle: {
     containerClassName: 'bg-gray-1',
     labelClassName: 'text-secondary',
     iconColor: TEXT_COLORS.secondary,

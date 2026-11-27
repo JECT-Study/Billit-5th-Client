@@ -64,7 +64,7 @@ export function ParticipantSheetActions({
               <View className="flex-row gap-12">
                 <Button
                   label="초대코드 공유"
-                  variant="subtle"
+                  variant="light"
                   onPress={handleShare}
                   isDisabled={isMutating}
                   className="flex-1"
