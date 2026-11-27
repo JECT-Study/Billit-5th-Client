@@ -33,6 +33,7 @@ export function ParticipantList({
   function handleAddGuest() {
     onAddGuest();
   }
+  // Figma: Invite / Participant (2260:16939) 행. 높이 48, 아래 테두리
   return (
     <ScrollView
       className="mt-30"
@@ -51,16 +52,16 @@ export function ParticipantList({
               key={i}
               className="border-gray-2 px-18 h-48 flex-row items-center justify-between border-b"
             >
-              <Text className="text-secondary text-body-2">참여자 {i + 1}</Text>
+              <Text className="text-body-2 text-gray-7 font-medium">
+                참여자 {i + 1}
+              </Text>
               {canManage ? (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel="직접 추가하기"
                   onPress={handleAddGuest}
-                  className="border-sky-60 rounded-6 border px-10 py-6"
                 >
-                  <Text className="text-sky-60 text-caption-2 font-semibold">
-                    직접 추가하기
-                  </Text>
+                  <SelectionChip label="직접 추가하기" tone="stroke" />
                 </Pressable>
               ) : null}
             </View>
@@ -73,10 +74,13 @@ export function ParticipantList({
           {active.map((p) => (
             <View
               key={p.tripMemberId}
-              className="px-18 h-48 flex-row items-center justify-between"
+              className="border-gray-2 px-18 h-48 flex-row items-center justify-between border-b"
             >
-              <View className="flex-row items-center gap-4">
-                <Text className="text-strong text-body-2">
+              <View className="flex-row items-center gap-2">
+                {/* Figma: 방장 닉네임만 gray-6 */}
+                <Text
+                  className={`text-body-2 font-medium ${p.role === 'ADMIN' ? 'text-gray-6' : 'text-gray-7'}`}
+                >
                   {p.tripNickname}
                 </Text>
                 {p.role === 'ADMIN' ? (
@@ -88,7 +92,7 @@ export function ParticipantList({
                     accessibilityLabel={`${p.tripNickname} 수정`}
                     onPress={() => onEditParticipant(p)}
                   >
-                    <EditIcon size={20} />
+                    <EditIcon size={20} color={COLORS['gray-6']} />
                   </Pressable>
                 ) : null}
               </View>

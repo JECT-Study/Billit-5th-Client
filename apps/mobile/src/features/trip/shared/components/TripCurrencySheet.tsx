@@ -63,12 +63,12 @@ export function TripCurrencySheet({
                   accessibilityLabel={currency.label}
                   accessibilityState={{ selected: isSelected }}
                   onPress={handlePress}
-                  className={`rounded-8 basis-[48%] flex-row items-center gap-6 border px-12 py-10 ${isSelected ? 'bg-surface-selected border-selected' : 'border-gray-2'}`}
+                  className={`rounded-8 h-[46px] basis-[48%] flex-row items-center justify-center gap-10 border ${isSelected ? 'bg-surface-selected border-selected' : 'border-gray-2'}`}
                 >
                   <CurrencyFlag currency={currency.code} />
                   <Text
                     numberOfLines={1}
-                    className={`text-body-2 flex-1 font-medium ${isSelected ? 'text-brand' : 'text-secondary'}`}
+                    className={`text-body-2 shrink font-medium ${isSelected ? 'text-sky-100' : 'text-secondary'}`}
                   >
                     {currency.label}
                   </Text>

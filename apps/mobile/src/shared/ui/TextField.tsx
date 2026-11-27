@@ -21,7 +21,6 @@ type TextFieldProps = {
   showLabel?: boolean;
 };
 
-// Figma: Field/Text (3037:66827) = 라벨 + Input / State=input, Type=default (2260:17258) + 안내·에러 문구
 export function TextField({
   label,
   value,
@@ -75,12 +74,15 @@ export function TextField({
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder={placeholder}
-            placeholderTextColor={COLORS['gray-6']}
+            placeholderTextColor={
+              isFocused ? COLORS['gray-6'] : COLORS['gray-5']
+            }
             maxLength={maxLength}
             autoFocus={autoFocus}
             autoCorrect={false}
             underlineColorAndroid="transparent"
-            selectionColor={COLORS['sky-60']}
+            selectionColor={COLORS['gray-4']}
+            cursorColor={COLORS['gray-4']}
             className="text-strong flex-1 font-medium"
             style={{
               fontSize: FONT_SIZE['body-2'][0],
@@ -92,7 +94,7 @@ export function TextField({
               textAlignVertical: 'center',
             }}
           />
-          <Text className="text-secondary text-caption-1 ml-8">
+          <Text className="text-secondary text-caption-2 ml-8 font-semibold">
             {value.length}/{maxLength}
           </Text>
         </View>

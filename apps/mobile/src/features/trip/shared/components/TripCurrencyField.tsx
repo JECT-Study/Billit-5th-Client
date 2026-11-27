@@ -51,7 +51,7 @@ export function TripCurrencyField({ value, onChange }: TripCurrencyFieldProps) {
           <CaretRightSmIcon color={COLORS['sky-90']} />
         </Pressable>
       </View>
-      <View className="border-gray-2 rounded-8 px-18 flex-row items-center gap-12 border py-12">
+      <View className="border-gray-2 rounded-8 px-18 h-48 flex-row items-center justify-between border">
         <View className="flex-row items-center gap-6">
           <CurrencyFlag currency={value} />
           <Text className="text-secondary text-body-2 font-medium">
