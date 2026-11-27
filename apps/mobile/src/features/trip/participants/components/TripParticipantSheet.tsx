@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   Modal,
   Platform,
@@ -139,7 +139,7 @@ export function TripParticipantSheet({ tripId, onClose }: Props) {
       const result = await confirm.mutateAsync();
       if (result.status === 'CONFIRMED') {
         onClose();
-        Alert.alert('여행방을 오픈했어요', '여행 목록에서 확인할 수 있어요.');
+        router.push({ pathname: '/trips/[tripId]', params: { tripId } });
       } else setMessage('참여자가 모두 모이면 여행방을 오픈할 수 있어요.');
     } catch (error) {
       setMessage(participantErrorMessage(error));

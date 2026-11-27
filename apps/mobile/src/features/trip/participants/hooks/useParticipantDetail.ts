@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
@@ -63,7 +64,9 @@ export function useParticipantDetail(
     hasClosedForConfirmation.current = true;
     void queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
     onClose();
-  }, [detail.error, onClose, queryClient, trip]);
+    // 관리자가 오픈한 여행방 상세로 같이 이동한다.
+    router.push({ pathname: '/trips/[tripId]', params: { tripId } });
+  }, [detail.error, onClose, queryClient, trip, tripId]);
   useEffect(() => {
     if (!trip) return;
     const previous = previousTripState.current;
