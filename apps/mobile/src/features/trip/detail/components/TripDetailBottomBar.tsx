@@ -72,9 +72,11 @@ export function TripDetailBottomBar({
         <View className="flex-1">
           {isAddExpenseMenuOpen ? (
             <View
-              className={`absolute bottom-full mb-[7px] ${isSettlementVisible ? 'right-0' : 'inset-x-0 items-center'}`}
+              // Figma(3830:53104): 버튼 위 8. 일반 참여자는 버튼과 같은 너비로 펼친다.
+              className={`absolute bottom-full mb-8 ${isSettlementVisible ? 'right-0' : 'inset-x-0'}`}
             >
               <TripAddExpenseMenu
+                isFullWidth={!isSettlementVisible}
                 onPressManualExpense={handlePressManualExpense}
                 onPressReceiptExpense={handlePressReceiptExpense}
               />

@@ -14,6 +14,7 @@ type TripRecordTabsProps = {
   onChange: (tab: TripRecordTab) => void;
 };
 
+// Figma: Tabs / Expense Entry, underline-default / underline-selected (2260:16957)
 export function TripRecordTabs({ value, onChange }: TripRecordTabsProps) {
   return (
     <View accessibilityRole="tablist" className="flex-row">
@@ -30,9 +31,11 @@ export function TripRecordTabs({ value, onChange }: TripRecordTabsProps) {
             accessibilityRole="tab"
             accessibilityState={{ selected: isSelected }}
             onPress={handlePress}
-            className={`flex-1 items-center border-b px-10 py-6 ${isSelected ? 'border-black' : 'border-gray-2'}`}
+            className={`flex-1 items-center px-20 py-10 ${isSelected ? 'border-b border-black' : ''}`}
           >
-            <Text className="text-label-1 text-primary font-medium">
+            <Text
+              className={`text-body-1 font-semibold ${isSelected ? 'text-black' : 'text-gray-5'}`}
+            >
               {option.label}
             </Text>
           </Pressable>

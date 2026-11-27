@@ -14,7 +14,8 @@ import { DropdownField } from '@/shared/ui/DropdownField';
 import { DropdownMenu } from '@/shared/ui/DropdownMenu';
 import type { PopoverAnchor } from '@/shared/ui/popoverPosition';
 
-const DATE_MENU_MAX_HEIGHT = 190;
+// 행 높이 40 + 간격 8. 4개 반이 보여 스크롤할 수 있음을 알 수 있게 한다
+const DATE_MENU_MAX_HEIGHT = 48 * 4 + 20;
 
 type TripExpenseFilterBarProps = {
   filter: TripExpenseFilter;

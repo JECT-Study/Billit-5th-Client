@@ -56,14 +56,18 @@ export function DropdownMenu({
   return (
     <View
       style={{ boxShadow: SHADOW.light }}
-      className="bg-surface-default rounded-8 overflow-hidden py-[5px]"
+      className="bg-surface-default rounded-8 overflow-hidden py-6"
     >
       {maxHeight ? (
-        <ScrollView style={{ maxHeight }} nestedScrollEnabled>
+        <ScrollView
+          style={{ maxHeight }}
+          contentContainerClassName="gap-8"
+          nestedScrollEnabled
+        >
           {rows}
         </ScrollView>
       ) : (
-        rows
+        <View className="gap-8">{rows}</View>
       )}
     </View>
   );
