@@ -136,6 +136,7 @@ export function DateRangePicker({
             mode="date"
             display="inline"
             locale="ko_KR"
+            themeVariant="light"
             onValueChange={handleIosDateChange}
           />
           <View className="w-full flex-row gap-8">

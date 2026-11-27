@@ -121,6 +121,8 @@ export function DatePicker({
             mode="date"
             display="inline"
             locale="ko_KR"
+            // 팝업 배경이 항상 흰색이라 기기가 다크 모드여도 밝은 달력으로 그린다.
+            themeVariant="light"
             onValueChange={handleNativeDateChange}
           />
         </View>
