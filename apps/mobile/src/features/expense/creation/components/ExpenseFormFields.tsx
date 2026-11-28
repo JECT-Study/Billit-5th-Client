@@ -39,7 +39,9 @@ export function ExpenseInput({
       </View>
       <View className="rounded-12 border-gray-2 px-18 h-48 flex-row items-center border bg-white">
         {prefix ? (
-          <Text className="text-body-2 text-strong mr-6 font-medium">{prefix}</Text>
+          <Text className="text-body-2 text-strong mr-6 font-medium">
+            {prefix}
+          </Text>
         ) : null}
         <TextInput
           accessibilityLabel={label}
