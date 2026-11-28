@@ -50,6 +50,9 @@ const config: ExpoConfig = {
   ios: {
     icon: './assets/expo.icon',
     bundleIdentifier: 'app.billit.mobile',
+    config: {
+      usesNonExemptEncryption: false,
+    },
     appleTeamId: '47PCQDM827',
     usesAppleSignIn: true,
   },
@@ -122,10 +125,10 @@ const config: ExpoConfig = {
   },
   ...(easProjectId
     ? {
-        updates: {
-          url: `https://u.expo.dev/${easProjectId}`,
-        },
-      }
+      updates: {
+        url: `https://u.expo.dev/${easProjectId}`,
+      },
+    }
     : {}),
 };
 
