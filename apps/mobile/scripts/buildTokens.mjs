@@ -24,13 +24,15 @@ const fontFamilyName = (family, style) => `${family}-${style}`;
 const SHADOW_NAME_MAP = { 'light sh': 'light', blur: 'inner-glow' };
 
 // ─── 이름 규칙 ──────────────────────────────────────────────
-// Primitive: color/sky/60 → sky-60, color/gray/008 → gray-8, color/white/alpha-90 → white-alpha-90
+// Primitive: color/sky/60 → sky-60, color/sky/gradient_end → sky-gradient-end, color/gray/008 → gray-8, color/white/alpha-90 → white-alpha-90
 const primitiveKey = (name) =>
   name
     .replace(/^color\//, '')
     .split('/')
     .map((s) => s.replace(/^0+(?=\d)/, ''))
-    .join('-');
+    .join('-')
+    // Figma 이름의 _ 도 - 로 (color/sky/gradient_end → sky-gradient-end)
+    .replaceAll('_', '-');
 
 // Semantic: 유틸리티 이름과 겹치는 그룹은 전용 테마 키로 보냄
 //   color/text/muted      → TEXT_COLORS.muted       → className="text-muted"

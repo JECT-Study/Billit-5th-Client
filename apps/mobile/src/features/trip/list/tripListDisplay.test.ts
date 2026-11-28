@@ -1,5 +1,6 @@
 import {
   formatTripDateRange,
+  formatKrw,
   formatTripSpentAmount,
   getTripElapsedRatio,
 } from '@/features/trip/list/tripListDisplay';
@@ -22,5 +23,18 @@ describe('tripListDisplay', () => {
     );
     expect(formatTripSpentAmount('100000.00')).toBe('100,000원 사용');
     expect(formatTripSpentAmount('0.00')).toBe('0원 사용');
+  });
+});
+
+describe('formatKrw', () => {
+  it.each([
+    ['88000.00', '88,000원'],
+    ['0.00', '0원'],
+    ['999.00', '999원'],
+    ['1000.00', '1,000원'],
+    ['1234567.89', '1,234,567원'],
+    ['-5000.00', '-5,000원'],
+  ])('%s → %s', (amount, expected) => {
+    expect(formatKrw(amount)).toBe(expected);
   });
 });

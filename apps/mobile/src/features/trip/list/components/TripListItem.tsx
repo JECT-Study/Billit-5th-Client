@@ -17,7 +17,7 @@ import { Text } from '@/shared/ui/Text';
 type TripListItemProps = {
   trip: TripListItemData;
   today: string;
-  onPress: (tripId: string) => void;
+  onPress: (trip: TripListItemData) => void;
 };
 
 const CHIP_TONES: Record<TripDisplayStatus, SelectionChipTone> = {
@@ -34,7 +34,7 @@ export function TripListItem({ trip, today, onPress }: TripListItemProps) {
   const progressPercent = Math.round(getTripElapsedRatio(trip, today) * 100);
 
   function handlePress() {
-    onPress(trip.tripId);
+    onPress(trip);
   }
 
   return (

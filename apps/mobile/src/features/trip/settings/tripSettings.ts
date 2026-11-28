@@ -8,9 +8,10 @@ export type TripSettingsNotice = {
 };
 
 const DELETED_TRIP_MESSAGE = '삭제된 여행이에요.';
-const NO_ACCESS_MESSAGE = '이 여행방에 접근할 수 없어요.';
+export const NO_ACCESS_MESSAGE = '이 여행방에 접근할 수 없어요.';
 const ADMIN_ONLY_MESSAGE = '여행 관리자만 여행방을 설정할 수 있어요.';
-const LOAD_FAILED_MESSAGE = '여행 정보를 불러오지 못했어요. 다시 시도해주세요.';
+export const LOAD_FAILED_MESSAGE =
+  '여행 정보를 불러오지 못했어요. 다시 시도해주세요.';
 const SAVE_FAILED_MESSAGE = '여행 정보를 저장하지 못했어요. 다시 시도해주세요.';
 const CAPACITY_LOCKED_MESSAGE = '지금은 여행 총인원을 바꿀 수 없어요.';
 const RECORDS_EXIST_MESSAGE = '지출 또는 정산 기록이 있어 삭제할 수 없어요.';

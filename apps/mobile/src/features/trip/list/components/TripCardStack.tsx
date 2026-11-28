@@ -3,6 +3,7 @@ import {
   Animated,
   Easing,
   PanResponder,
+  Pressable,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -28,6 +29,7 @@ type TripCardStackProps = {
   trips: TripListItem[];
   activeIndex: number;
   onChangeIndex: (index: number) => void;
+  onPressTrip: (trip: TripListItem) => void;
 };
 
 /**
@@ -41,6 +43,7 @@ export function TripCardStack({
   trips,
   activeIndex,
   onChangeIndex,
+  onPressTrip,
 }: TripCardStackProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [dragX] = useState(() => new Animated.Value(0));
@@ -131,6 +134,11 @@ export function TripCardStack({
   );
 
   if (!trip) return null;
+  const frontTrip = trip;
+
+  function handlePressFrontCard() {
+    onPressTrip(frontTrip);
+  }
 
   const frontStyle = {
     transform: [
@@ -234,7 +242,13 @@ export function TripCardStack({
           </Animated.View>
         ) : null}
         <Animated.View style={[styles.front, frontStyle]}>
-          <TripFeaturedCard trip={trip} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={trip.name}
+            onPress={handlePressFrontCard}
+          >
+            <TripFeaturedCard trip={trip} />
+          </Pressable>
         </Animated.View>
       </View>
     </View>

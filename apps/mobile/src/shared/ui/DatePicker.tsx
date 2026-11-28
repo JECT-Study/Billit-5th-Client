@@ -23,16 +23,17 @@ type DatePickerProps = {
 };
 
 // Figma: Date and time - Pickers (3037:55473). 토큰에 없는 그림자라 시안 값을 그대로 쓴다.
-const POPOVER_SHADOW = '0px 8.838px 26.514px 0px rgba(0, 0, 0, 0.1)';
-const POPOVER_GAP = 6;
+export const DATE_PICKER_POPOVER_SHADOW =
+  '0px 8.838px 26.514px 0px rgba(0, 0, 0, 0.1)';
+export const DATE_PICKER_POPOVER_GAP = 6;
 
-function toLocalDate(value: string) {
+export function toLocalDate(value: string) {
   if (!value) return new Date();
   const [year, month, day] = value.split('-').map(Number);
   return new Date(year, month - 1, day, 12);
 }
 
-function toDateString(date: Date) {
+export function toDateString(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -56,12 +57,12 @@ export function DatePicker({
   const [popoverHeight, setPopoverHeight] = useState<number | null>(null);
   const popoverTop =
     popoverHeight === null
-      ? anchor.bottom + POPOVER_GAP
+      ? anchor.bottom + DATE_PICKER_POPOVER_GAP
       : getPopoverTop(
           anchor,
           popoverHeight,
           { top: insets.top, bottom: windowHeight - insets.bottom },
-          POPOVER_GAP,
+          DATE_PICKER_POPOVER_GAP,
         );
 
   function handleNativeDateChange(_event: unknown, date: Date) {
@@ -109,7 +110,7 @@ export function DatePicker({
           onLayout={handlePopoverLayout}
           style={{
             top: popoverTop,
-            boxShadow: POPOVER_SHADOW,
+            boxShadow: DATE_PICKER_POPOVER_SHADOW,
             // 높이를 재기 전에는 숨겨서 아래에 그렸다가 위로 옮겨지며 깜빡이지 않게 한다.
             opacity: popoverHeight === null ? 0 : 1,
           }}
@@ -120,6 +121,8 @@ export function DatePicker({
             mode="date"
             display="inline"
             locale="ko_KR"
+            // 팝업 배경이 항상 흰색이라 기기가 다크 모드여도 밝은 달력으로 그린다.
+            themeVariant="light"
             onValueChange={handleNativeDateChange}
           />
         </View>

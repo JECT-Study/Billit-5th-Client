@@ -25,18 +25,18 @@ export function DropdownDateRange({
   }
 
   return (
-    <View className="flex-row items-center gap-6">
+    <View className="flex-row items-center gap-10">
       <DropdownField
         label={startDate ? startDate.replaceAll('-', '.') : '시작일'}
         accessibilityLabel="시작일 선택"
-        variant="date-compact"
+        variant="date-full"
         onPress={handlePressStartDate}
       />
       <TildeIcon />
       <DropdownField
         label={endDate ? endDate.replaceAll('-', '.') : '종료일'}
         accessibilityLabel="종료일 선택"
-        variant="date-compact"
+        variant="date-full"
         onPress={handlePressEndDate}
       />
     </View>

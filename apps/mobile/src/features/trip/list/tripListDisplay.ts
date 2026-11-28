@@ -53,12 +53,15 @@ export function formatTripDateRange(startDate: string, endDate: string) {
   return `${formatTripDate(startDate)}~${formatTripDate(endDate)}`;
 }
 
-/** "100000.00" → "100,000원 사용" */
-export function formatTripSpentAmount(amountKrw: string) {
+export function formatKrw(amountKrw: string) {
   const [integerPart = '0'] = amountKrw.split('.');
   const sign = integerPart.startsWith('-') ? '-' : '';
   const digits = integerPart.replace('-', '');
-  return `${sign}${digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}원 사용`;
+  return `${sign}${digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}원`;
+}
+
+export function formatTripSpentAmount(amountKrw: string) {
+  return `${formatKrw(amountKrw)} 사용`;
 }
 
 export function getTodayIsoDate(now: Date = new Date()) {

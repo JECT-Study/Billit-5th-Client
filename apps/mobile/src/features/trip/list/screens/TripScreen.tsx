@@ -22,7 +22,11 @@ import { TripListItem } from '@/features/trip/list/components/TripListItem';
 import { useInviteCodeDialogOnSignup } from '@/features/trip/invitation/hooks/useInviteCodeDialogOnSignup';
 import { useTripListQuery } from '@/features/trip/list/hooks/useTripListQuery';
 import { getTodayIsoDate } from '@/features/trip/list/tripListDisplay';
-import type { TripListFilter } from '@/features/trip/list/tripListSchema';
+import type {
+  TripListFilter,
+  TripListItem as TripListItemData,
+} from '@/features/trip/list/tripListSchema';
+import { canOpenTripDetail } from '@/features/trip/tripPermission';
 import { Button } from '@/shared/ui/Button';
 import { GradientBackground } from '@/shared/ui/GradientBackground';
 import { MoreIcon } from '@/shared/ui/icons';
@@ -115,9 +119,17 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
   const inviteCodeDialog = inviteCodeDialogState.isOpen ? (
     <InviteCodeDialog onClose={handleCloseInviteCodeDialog} />
   ) : null;
-  function handlePressTrip(tripId: string) {
-    const trip = trips.find((item) => item.tripId === tripId);
-    if (trip?.status === 'UNCONFIRMED') onOpenParticipantSheet(tripId);
+
+  // 시작된 여행은 여행방 상세로, 초대중(확정 전) 여행은 참여 현황 시트를 연다.
+  function handlePressTrip(trip: TripListItemData) {
+    if (canOpenTripDetail(trip)) {
+      router.push({
+        pathname: '/trips/[tripId]',
+        params: { tripId: trip.tripId },
+      });
+      return;
+    }
+    onOpenParticipantSheet(trip.tripId);
   }
 
   function handlePressMore() {
@@ -172,7 +184,8 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
   if (isEmpty && filter === undefined) {
     return (
       <SafeAreaView edges={['top', 'left', 'right']} className="flex-1">
-        <GradientBackground />
+        {/* Figma: 여행방 없음 (3037:54776) */}
+        <GradientBackground endColor={COLORS['sky-gradient-end']} />
         <TripHomeHeader onPressNotification={handlePressNotification} />
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -229,6 +242,7 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
                 trips={ongoingTrips}
                 activeIndex={activeOngoingTripIndex}
                 onChangeIndex={handleChangeCardIndex}
+                onPressTrip={handlePressTrip}
               />
               <View className="mt-4 flex-row items-center justify-center gap-6">
                 {ongoingTrips.map((trip, index) => (
@@ -261,7 +275,7 @@ export function TripScreen({ onOpenParticipantSheet }: Props) {
           </View>
         </View>
 
-        <View className="gap-[2px] px-24 pt-8">
+        <View className="gap-2 px-24 pt-8">
           {trips.map((trip) => (
             <TripListItem
               key={trip.tripId}

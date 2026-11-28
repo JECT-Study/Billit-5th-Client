@@ -83,12 +83,10 @@ export function TripCreateCompleteScreen() {
       className="bg-surface-default flex-1"
     >
       <TripCreatedDecoration />
-      <View className="px-24">
-        <NavigationHeader
-          title="여행방 생성 완료"
-          onPressBack={handleGoToTrips}
-        />
-      </View>
+      <NavigationHeader
+        title="여행방 생성 완료"
+        onPressBack={handleGoToTrips}
+      />
       <View className="px-24 pt-32">
         <GradientText
           text={`${name ? `${name} ` : ''}여행방이\n생성되었어요.`}

@@ -74,9 +74,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest --config jest.config.js",
-    "tokens:build": "node scripts/buildTokens.mjs",
-    "icons:build": "node scripts/buildIcons.mjs",
-    "icons:sync": "node --env-file-if-exists=.env.local scripts/figma/syncIcons.mjs"
+    "tokens:build": "prettier --write src/theme/tokens.json && node scripts/buildTokens.mjs && prettier --write src/theme/theme.generated.ts",
+    "icons:build": "node scripts/buildIcons.mjs && prettier --write src/shared/ui/icons/index.ts",
+    "icons:sync": "node --env-file-if-exists=.env.local scripts/figma/syncIcons.mjs && prettier --write src/shared/ui/icons/index.ts src/shared/ui/icons/icons.figma.json"
   },
   "private": true
 }

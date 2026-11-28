@@ -2,10 +2,12 @@
 // SVG 원본: assets/icons/*.svg (react-native-svg-transformer가 컴포넌트로 바꿔 줌)
 import AddSvg from '@/assets/icons/add.svg';
 import AiSvg from '@/assets/icons/ai.svg';
+import AlertSolidSvg from '@/assets/icons/alert-solid.svg';
 import ArrowLeftSvg from '@/assets/icons/arrow-left.svg';
 import BellSvg from '@/assets/icons/bell.svg';
 import BellNotificationSvg from '@/assets/icons/bell-notification.svg';
 import BookOpenSvg from '@/assets/icons/book-open.svg';
+import Bug24RegularSvg from '@/assets/icons/bug-24-regular.svg';
 import BulbSvg from '@/assets/icons/bulb.svg';
 import CalendarSvg from '@/assets/icons/calendar.svg';
 import CameraFillSvg from '@/assets/icons/camera-fill.svg';
@@ -32,6 +34,7 @@ import CloseCircleSvg from '@/assets/icons/close-circle.svg';
 import CloseLgSvg from '@/assets/icons/close-lg.svg';
 import CloseMdSvg from '@/assets/icons/close-md.svg';
 import CloseSmSvg from '@/assets/icons/close-sm.svg';
+import CoinBagSolidSvg from '@/assets/icons/coin-bag-solid.svg';
 import CompanySvg from '@/assets/icons/company.svg';
 import CrownFillSvg from '@/assets/icons/crown-fill.svg';
 import DocumentSvg from '@/assets/icons/document.svg';
@@ -53,18 +56,21 @@ import ImgAddSvg from '@/assets/icons/img-add.svg';
 import InfoSvg from '@/assets/icons/info.svg';
 import InfoWarningSvg from '@/assets/icons/info-warning.svg';
 import LinkSvg from '@/assets/icons/link.svg';
+import ListUlSvg from '@/assets/icons/list-ul.svg';
 import MinusSvg from '@/assets/icons/minus.svg';
 import MoreSvg from '@/assets/icons/more.svg';
 import ProfileSvg from '@/assets/icons/profile.svg';
 import ReceiptFillSvg from '@/assets/icons/receipt-fill.svg';
 import ReceiptSvg from '@/assets/icons/receipt.svg';
 import RefreshFillSvg from '@/assets/icons/refresh-fill.svg';
+import RoundHeartBrokenSvg from '@/assets/icons/round-heart-broken.svg';
 import SearchSvg from '@/assets/icons/search.svg';
 import SendSvg from '@/assets/icons/send.svg';
 import SettingFillSvg from '@/assets/icons/setting-fill.svg';
 import SettingSvg from '@/assets/icons/setting.svg';
 import ShareSvg from '@/assets/icons/share.svg';
 import ShieldCheckSvg from '@/assets/icons/shield-check.svg';
+import StoreAltFilledSvg from '@/assets/icons/store-alt-filled.svg';
 import TrashFillSvg from '@/assets/icons/trash-fill.svg';
 import TriangleDownFillSvg from '@/assets/icons/triangle-down-fill.svg';
 import UserFillSvg from '@/assets/icons/user-fill.svg';
@@ -75,6 +81,7 @@ import { createIcon } from './CreateIcon';
 
 export const AddIcon = createIcon(AddSvg, 24, 'AddIcon'); // add (2260:17063)
 export const AiIcon = createIcon(AiSvg, 24, 'AiIcon'); // ai (2260:17132)
+export const AlertSolidIcon = createIcon(AlertSolidSvg, 24, 'AlertSolidIcon'); // clarity:alert-solid (3164:38454)
 export const ArrowLeftIcon = createIcon(ArrowLeftSvg, 24, 'ArrowLeftIcon'); // arrow_left (2260:17113)
 export const BellIcon = createIcon(BellSvg, 24, 'BellIcon'); // bell (2260:17111)
 export const BellNotificationIcon = createIcon(
@@ -83,6 +90,11 @@ export const BellNotificationIcon = createIcon(
   'BellNotificationIcon',
 ); // bell_notification (2260:17105)
 export const BookOpenIcon = createIcon(BookOpenSvg, 24, 'BookOpenIcon'); // book_open (2260:17117)
+export const Bug24RegularIcon = createIcon(
+  Bug24RegularSvg,
+  24,
+  'Bug24RegularIcon',
+); // fluent:bug-24-regular (3164:38445)
 export const BulbIcon = createIcon(BulbSvg, 24, 'BulbIcon'); // bulb (2260:17095)
 export const CalendarIcon = createIcon(CalendarSvg, 16, 'CalendarIcon'); // calendar (2438:17422)
 export const CameraFillIcon = createIcon(CameraFillSvg, 24, 'CameraFillIcon'); // camera_fill (2260:17160)
@@ -161,6 +173,11 @@ export const CloseCircleIcon = createIcon(
 export const CloseLgIcon = createIcon(CloseLgSvg, 24, 'CloseLgIcon'); // close_lg (2260:17061)
 export const CloseMdIcon = createIcon(CloseMdSvg, 24, 'CloseMdIcon'); // close_md (2260:17059)
 export const CloseSmIcon = createIcon(CloseSmSvg, 24, 'CloseSmIcon'); // close_sm (2260:17057)
+export const CoinBagSolidIcon = createIcon(
+  CoinBagSolidSvg,
+  24,
+  'CoinBagSolidIcon',
+); // clarity:coin-bag-solid (3226:69725)
 export const CompanyIcon = createIcon(CompanySvg, 24, 'CompanyIcon'); // company (2260:17119)
 export const CrownFillIcon = createIcon(CrownFillSvg, 24, 'CrownFillIcon'); // crown_fill (2330:24245)
 export const DocumentIcon = createIcon(DocumentSvg, 24, 'DocumentIcon'); // document (2260:17099)
@@ -186,6 +203,7 @@ export const InfoWarningIcon = createIcon(
   'InfoWarningIcon',
 ); // info_warning (2260:17134)
 export const LinkIcon = createIcon(LinkSvg, 24, 'LinkIcon'); // link (2260:17125)
+export const ListUlIcon = createIcon(ListUlSvg, 24, 'ListUlIcon'); // boxicons:list-ul (3164:38319)
 export const MinusIcon = createIcon(MinusSvg, 24, 'MinusIcon'); // minus (2260:17156)
 export const MoreIcon = createIcon(MoreSvg, 24, 'MoreIcon'); // more (2260:17109)
 export const ProfileIcon = createIcon(ProfileSvg, 24, 'ProfileIcon'); // profile (2260:17144)
@@ -200,6 +218,11 @@ export const RefreshFillIcon = createIcon(
   24,
   'RefreshFillIcon',
 ); // refresh_fill (2260:17151)
+export const RoundHeartBrokenIcon = createIcon(
+  RoundHeartBrokenSvg,
+  24,
+  'RoundHeartBrokenIcon',
+); // ic:round-heart-broken (3164:38468)
 export const SearchIcon = createIcon(SearchSvg, 24, 'SearchIcon'); // search (2260:17074)
 export const SendIcon = createIcon(SendSvg, 24, 'SendIcon'); // send (2260:17093)
 export const SettingFillIcon = createIcon(
@@ -214,6 +237,11 @@ export const ShieldCheckIcon = createIcon(
   24,
   'ShieldCheckIcon',
 ); // shield_check (2260:17138)
+export const StoreAltFilledIcon = createIcon(
+  StoreAltFilledSvg,
+  24,
+  'StoreAltFilledIcon',
+); // boxicons:store-alt-filled (3226:69691)
 export const TrashFillIcon = createIcon(TrashFillSvg, 24, 'TrashFillIcon'); // trash_fill (2260:17163)
 export const TriangleDownFillIcon = createIcon(
   TriangleDownFillSvg,

@@ -93,9 +93,7 @@ export function TripSettingsScreen({ tripId }: TripSettingsScreenProps) {
       edges={['top', 'left', 'right', 'bottom']}
       className="bg-surface-default flex-1"
     >
-      <View className="px-24">
-        <NavigationHeader title={TITLE} onPressBack={handlePressBack} />
-      </View>
+      <NavigationHeader title={TITLE} onPressBack={handlePressBack} />
       {notice ? null : (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={COLORS['action-primary-background']} />
@@ -240,13 +238,11 @@ function TripSettingsForm({ trip }: TripSettingsFormProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
-        <View className="px-24">
-          <NavigationHeader
-            title={TITLE}
-            onPressBack={handlePressHeaderBack}
-            isBackDisabled={isBusy}
-          />
-        </View>
+        <NavigationHeader
+          title={TITLE}
+          onPressBack={handlePressHeaderBack}
+          isBackDisabled={isBusy}
+        />
 
         <ScrollView
           className="flex-1"

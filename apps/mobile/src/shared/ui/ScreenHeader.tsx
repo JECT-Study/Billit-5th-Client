@@ -8,10 +8,10 @@ type ScreenHeaderProps = {
 
 export function ScreenHeader({ title }: ScreenHeaderProps) {
   return (
-    <View className="h-48 items-center justify-center">
+    <View className="h-44 items-center justify-center">
       <Text
         accessibilityRole="header"
-        className="text-primary text-heading-2 text-center font-semibold"
+        className="text-strong text-body-1 text-center font-semibold"
       >
         {title}
       </Text>

@@ -66,13 +66,11 @@ export function ParticipantEditor({
         className="bg-surface-subtle flex-1"
         style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
       >
-        <View className="px-24">
-          <NavigationHeader
-            title={editing === 'new' ? '친구 직접 추가' : '닉네임 직접 수정'}
-            onPressBack={handleBack}
-            isBackDisabled={isBusy}
-          />
-        </View>
+        <NavigationHeader
+          title={editing === 'new' ? '친구 직접 추가' : '닉네임 직접 수정'}
+          onPressBack={handleBack}
+          isBackDisabled={isBusy}
+        />
         <ScrollView
           className="flex-1"
           keyboardShouldPersistTaps="handled"

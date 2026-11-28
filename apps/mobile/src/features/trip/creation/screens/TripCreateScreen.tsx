@@ -199,12 +199,12 @@ export function TripCreateScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
+        <NavigationHeader
+          title="여행방 만들기"
+          onPressBack={handlePressBack}
+          isBackDisabled={createTripMutation.isPending}
+        />
         <View className="px-24">
-          <NavigationHeader
-            title="여행방 만들기"
-            onPressBack={handlePressBack}
-            isBackDisabled={createTripMutation.isPending}
-          />
           <StepIndicator
             stepCount={LAST_STEP + 1}
             currentStepIndex={step}

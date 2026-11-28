@@ -93,13 +93,11 @@ export function TripJoinScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
-        <View className="px-24">
-          <NavigationHeader
-            title="닉네임 설정"
-            onPressBack={handlePressBack}
-            isBackDisabled={joinTripMutation.isPending}
-          />
-        </View>
+        <NavigationHeader
+          title="닉네임 설정"
+          onPressBack={handlePressBack}
+          isBackDisabled={joinTripMutation.isPending}
+        />
 
         <ScrollView
           className="flex-1"
