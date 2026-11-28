@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { NavigationHeader } from '@/shared/ui/NavigationHeader';
 
-export function FxScreen() {
+export function ExchangeRateScreen() {
   function handlePressBack() {
     router.back();
   }
