@@ -19,7 +19,7 @@ export function SettingsScreen() {
   }
 
   function handlePressExchangeRate() {
-    router.push('/my/fx');
+    router.push('/my/exchange-rate');
   }
 
   function handlePressLogout() {

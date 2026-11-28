@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { TripAddExpenseMenu } from '@/features/trip/detail/components/TripAddExpenseMenu';
 import { Button } from '@/shared/ui/Button';
 import { GradientBackground } from '@/shared/ui/GradientBackground';
 import { COLORS } from '@/theme/theme.generated';
@@ -15,20 +14,14 @@ export const TRIP_DETAIL_BOTTOM_BAR_HEIGHT =
 
 type TripDetailBottomBarProps = {
   isSettlementVisible: boolean;
-  isAddExpenseMenuOpen: boolean;
   onPressSettlement: () => void;
   onPressAddExpense: () => void;
-  onPressManualExpense: () => void;
-  onPressReceiptExpense: () => void;
 };
 
 export function TripDetailBottomBar({
   isSettlementVisible,
-  isAddExpenseMenuOpen,
   onPressSettlement,
   onPressAddExpense,
-  onPressManualExpense,
-  onPressReceiptExpense,
 }: TripDetailBottomBarProps) {
   const insets = useSafeAreaInsets();
 
@@ -38,14 +31,6 @@ export function TripDetailBottomBar({
 
   function handlePressAddExpense() {
     onPressAddExpense();
-  }
-
-  function handlePressManualExpense() {
-    onPressManualExpense();
-  }
-
-  function handlePressReceiptExpense() {
-    onPressReceiptExpense();
   }
 
   return (
@@ -70,18 +55,6 @@ export function TripDetailBottomBar({
           />
         ) : null}
         <View className="flex-1">
-          {isAddExpenseMenuOpen ? (
-            <View
-              // Figma(3830:53104): 버튼 위 8. 일반 참여자는 버튼과 같은 너비로 펼친다.
-              className={`absolute bottom-full mb-8 ${isSettlementVisible ? 'right-0' : 'inset-x-0'}`}
-            >
-              <TripAddExpenseMenu
-                isFullWidth={!isSettlementVisible}
-                onPressManualExpense={handlePressManualExpense}
-                onPressReceiptExpense={handlePressReceiptExpense}
-              />
-            </View>
-          ) : null}
           <Button label="지출 추가하기" onPress={handlePressAddExpense} />
         </View>
       </View>

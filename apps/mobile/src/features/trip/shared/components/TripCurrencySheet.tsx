@@ -5,7 +5,7 @@ import {
   TRIP_CURRENCIES,
   type TripCurrency,
 } from '@/features/trip/shared/tripCreationForm';
-import { CurrencyFlag } from '@/features/trip/shared/components/TripCurrencyFlag';
+import { CurrencyFlag } from '@/shared/ui/CurrencyFlag';
 import { Button } from '@/shared/ui/Button';
 import { Text } from '@/shared/ui/Text';
 

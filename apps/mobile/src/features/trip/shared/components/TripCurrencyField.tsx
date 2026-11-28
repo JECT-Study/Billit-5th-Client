@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { CurrencyFlag } from '@/features/trip/shared/components/TripCurrencyFlag';
+import { CurrencyFlag } from '@/shared/ui/CurrencyFlag';
 import { TripCurrencySheet } from '@/features/trip/shared/components/TripCurrencySheet';
 import {
   TRIP_CURRENCIES,

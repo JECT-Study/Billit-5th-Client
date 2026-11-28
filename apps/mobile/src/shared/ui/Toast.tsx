@@ -11,13 +11,14 @@ type ToastProps = {
   onDismiss: () => void;
   durationMs?: number;
   backgroundColor?: string;
+  variant?: 'standard' | 'compact';
 };
 
 export const DEFAULT_TOAST_DURATION_MS = 2000;
 // 시안은 상태바(46px) 아래 14px(화면 위에서 60px)에 둔다. 기기마다 안전영역이 달라서 inset에 더한다.
 const TOP_OFFSET_FROM_SAFE_AREA = 14;
 
-// Figma: Feedback / Toast, Type=standard (2260:17001). Type=compact(2260:16998)는 아직 지원하지 않는다.
+// Figma: Feedback / Toast, Type=standard (2260:17001), compact (2260:16998).
 // 화면 전체를 채우는 부모 안에서 위쪽 가운데에 겹쳐 보이고 잠시 뒤 사라진다.
 // SafeAreaView의 패딩은 absolute 자식에 적용되지 않으므로 안전영역 위쪽 값을 직접 더한다.
 export function Toast({
@@ -25,6 +26,7 @@ export function Toast({
   onDismiss,
   durationMs = DEFAULT_TOAST_DURATION_MS,
   backgroundColor,
+  variant = 'standard',
 }: ToastProps) {
   const insets = useSafeAreaInsets();
   const onDismissRef = useRef(onDismiss);
@@ -50,13 +52,24 @@ export function Toast({
       <View
         accessibilityRole="alert"
         accessibilityLiveRegion="polite"
-        className="bg-gray-1 rounded-12 min-h-[46px] flex-row items-center gap-6 p-10"
+        className={
+          variant === 'compact'
+            ? 'h-36 flex-row items-center gap-6 rounded-full bg-black px-12 py-6'
+            : 'bg-gray-1 rounded-12 min-h-[46px] flex-row items-center gap-6 p-10'
+        }
         style={backgroundColor ? { backgroundColor } : undefined}
       >
-        <InfoIcon color={COLORS['red-alert-dark']} />
+        <InfoIcon
+          color={
+            variant === 'compact' ? COLORS.white : COLORS['red-alert-dark']
+          }
+        />
         <Text
-          className="text-caption-1 shrink font-semibold"
-          style={{ color: COLORS['red-alert-dark'] }}
+          className={`${variant === 'compact' ? 'text-label-1' : 'text-caption-1'} shrink font-semibold`}
+          style={{
+            color:
+              variant === 'compact' ? COLORS.white : COLORS['red-alert-dark'],
+          }}
         >
           {message}
         </Text>

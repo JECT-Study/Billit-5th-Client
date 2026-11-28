@@ -1,12 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -55,9 +48,15 @@ function handlePressBack() {
 
 type TripDetailScreenProps = {
   tripId: string | undefined;
+  isExpenseAddedToastVisible?: boolean;
+  onDismissExpenseAddedToast?: () => void;
 };
 
-export function TripDetailScreen({ tripId }: TripDetailScreenProps) {
+export function TripDetailScreen({
+  tripId,
+  isExpenseAddedToastVisible = false,
+  onDismissExpenseAddedToast,
+}: TripDetailScreenProps) {
   const tripQuery = useTripQuery(tripId);
   const trip = tripQuery.data;
   const notice = getTripDetailNotice({
@@ -65,8 +64,18 @@ export function TripDetailScreen({ tripId }: TripDetailScreenProps) {
     trip,
     error: tripQuery.isError ? tripQuery.error : null,
   });
+  function handleDismissExpenseAddedToast() {
+    onDismissExpenseAddedToast?.();
+  }
 
-  if (trip && !notice) return <TripDetailContent trip={trip} />;
+  if (trip && !notice)
+    return (
+      <TripDetailContent
+        trip={trip}
+        isExpenseAddedToastVisible={isExpenseAddedToastVisible}
+        onDismissExpenseAddedToast={handleDismissExpenseAddedToast}
+      />
+    );
 
   return <TripDetailPlaceholder notice={notice} />;
 }
@@ -100,12 +109,20 @@ function TripDetailPlaceholder({ notice }: TripDetailPlaceholderProps) {
 
 type TripDetailContentProps = {
   trip: TripDetail;
+  isExpenseAddedToastVisible: boolean;
+  onDismissExpenseAddedToast?: () => void;
 };
 
-function TripDetailContent({ trip }: TripDetailContentProps) {
+function TripDetailContent({
+  trip,
+  isExpenseAddedToastVisible,
+  onDismissExpenseAddedToast,
+}: TripDetailContentProps) {
   const insets = useSafeAreaInsets();
-  const [isAddExpenseMenuOpen, setIsAddExpenseMenuOpen] = useState(false);
   const hasBottomBar = canAddExpense(trip);
+  function handleDismissExpenseAddedToast() {
+    onDismissExpenseAddedToast?.();
+  }
 
   function handlePressSettings() {
     router.push({
@@ -115,26 +132,14 @@ function TripDetailContent({ trip }: TripDetailContentProps) {
   }
 
   function handlePressSettlement() {
-    setIsAddExpenseMenuOpen(false);
     // TODO: 정산 대상 선택 화면이 생기면 이동
   }
 
   function handlePressAddExpense() {
-    setIsAddExpenseMenuOpen((current) => !current);
-  }
-
-  function handleCloseAddExpenseMenu() {
-    setIsAddExpenseMenuOpen(false);
-  }
-
-  function handlePressManualExpense() {
-    setIsAddExpenseMenuOpen(false);
-    // TODO: 수기 지출 기록 화면이 생기면 이동
-  }
-
-  function handlePressReceiptExpense() {
-    setIsAddExpenseMenuOpen(false);
-    // TODO: 영수증 지출 기록 화면이 생기면 이동
+    router.push({
+      pathname: '/trips/[tripId]/expenses/new',
+      params: { tripId: trip.tripId },
+    });
   }
 
   const settingsButton = canEditTrip(trip) ? (
@@ -179,22 +184,18 @@ function TripDetailContent({ trip }: TripDetailContentProps) {
         </View>
       </ScrollView>
 
-      {isAddExpenseMenuOpen ? (
-        <Pressable
-          accessibilityLabel="메뉴 닫기"
-          onPress={handleCloseAddExpenseMenu}
-          style={StyleSheet.absoluteFill}
-        />
-      ) : null}
-
       {hasBottomBar ? (
         <TripDetailBottomBar
           isSettlementVisible={canStartSettlement(trip)}
-          isAddExpenseMenuOpen={isAddExpenseMenuOpen}
           onPressSettlement={handlePressSettlement}
           onPressAddExpense={handlePressAddExpense}
-          onPressManualExpense={handlePressManualExpense}
-          onPressReceiptExpense={handlePressReceiptExpense}
+        />
+      ) : null}
+      {isExpenseAddedToastVisible && onDismissExpenseAddedToast ? (
+        <Toast
+          variant="compact"
+          message="지출이 추가되었어요."
+          onDismiss={handleDismissExpenseAddedToast}
         />
       ) : null}
     </SafeAreaView>

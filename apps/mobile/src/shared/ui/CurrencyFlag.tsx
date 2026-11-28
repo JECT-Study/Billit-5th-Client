@@ -1,4 +1,4 @@
-import type { TripCurrency } from '@/features/trip/shared/tripCreationForm';
+import type { Currency } from '@/shared/currency';
 import {
   FlagCnIcon,
   FlagEuIcon,
@@ -15,7 +15,7 @@ const CURRENCY_FLAG_ICONS = {
   CNY: FlagCnIcon,
 } as const;
 
-export function CurrencyFlag({ currency }: { currency: TripCurrency }) {
+export function CurrencyFlag({ currency }: { currency: Currency }) {
   const Icon = CURRENCY_FLAG_ICONS[currency];
   return <Icon />;
 }

@@ -17,6 +17,7 @@ import { COLORS } from '@/theme/theme.generated';
 type DatePickerProps = {
   value: string;
   minimumDate?: string;
+  maximumDate?: string;
   anchor: PopoverAnchor;
   onSelect: (date: string) => void;
   onClose: () => void;
@@ -47,6 +48,7 @@ export function toDateString(date: Date) {
 export function DatePicker({
   value,
   minimumDate,
+  maximumDate,
   anchor,
   onSelect,
   onClose,
@@ -82,6 +84,7 @@ export function DatePicker({
       <DateTimePicker
         value={toLocalDate(value)}
         minimumDate={minimumDate ? toLocalDate(minimumDate) : undefined}
+        maximumDate={maximumDate ? toLocalDate(maximumDate) : undefined}
         mode="date"
         presentation="dialog"
         accentColor={COLORS['sky-60']}
@@ -118,6 +121,7 @@ export function DatePicker({
           <RNDateTimePicker
             value={toLocalDate(value)}
             minimumDate={minimumDate ? toLocalDate(minimumDate) : undefined}
+            maximumDate={maximumDate ? toLocalDate(maximumDate) : undefined}
             mode="date"
             display="inline"
             locale="ko_KR"
